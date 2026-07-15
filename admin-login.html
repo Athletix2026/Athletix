@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Athletix | Connexion admin</title>
   <meta name="description" content="Connexion privee au back-office Athletix.">
+  <script src="assets/auth.js"></script>
   <script src="assets/supabase-config.js"></script>
   <style>
     :root {
@@ -130,9 +131,9 @@
   <main class="card">
     <div class="brand">
       <strong>Athletix</strong>
-      <span>Admin access</span>
+      <span>Compte prive</span>
     </div>
-    <p>Connexion privee reservee aux administrateurs. Cette page n'est pas visible sur la boutique publique.</p>
+    <p>Connecte-toi avec le compte administrateur pour gerer les commandes, les stocks, les clients et la newsletter.</p>
 
     <form id="loginForm">
       <label>
@@ -160,6 +161,10 @@
     const config = window.ATHLETIX_SUPABASE || {};
     const supabaseUrl = (config.url || "").replace(/\/$/, "");
     const publishableKey = config.publishableKey || "";
+
+    if (window.AthletixAuth?.isAdmin?.()) {
+      window.location.href = "admin.html";
+    }
 
     async function supabaseRequest(path, options = {}, accessToken = "") {
       const response = await fetch(`${supabaseUrl}${path}`, {
