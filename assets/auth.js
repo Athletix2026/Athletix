@@ -75,8 +75,28 @@
 
     const user = getUser();
     if (!user) {
-      mount.hidden = true;
-      mount.innerHTML = "";
+      mount.hidden = false;
+      mount.innerHTML = `
+        <button class="profile-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Ouvrir le menu compte">
+          <span class="profile-avatar">U</span>
+        </button>
+        <div class="profile-menu" hidden>
+          <strong>Compte</strong>
+          <a href="${LOGIN}">Connexion</a>
+        </div>
+      `;
+      const trigger = mount.querySelector(".profile-trigger");
+      const menu = mount.querySelector(".profile-menu");
+      trigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const open = menu.hidden;
+        menu.hidden = !open;
+        trigger.setAttribute("aria-expanded", String(open));
+      });
+      document.addEventListener("click", () => {
+        menu.hidden = true;
+        trigger.setAttribute("aria-expanded", "false");
+      });
       return;
     }
 

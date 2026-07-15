@@ -196,12 +196,43 @@
     return order;
   }
 
+  async function addNewsletterSubscriber(email, source = "homepage") {
+    const cleanEmail = String(email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      throw new Error("Adresse email invalide.");
+    }
+
+    try {
+      await request("newsletter_subscribers", {
+        method: "POST",
+        prefer: "return=minimal",
+        body: JSON.stringify({
+          email: cleanEmail,
+          source,
+          status: "active"
+        })
+      });
+      return { email: cleanEmail, alreadySubscribed: false };
+    } catch (error) {
+      if (String(error.message || "").includes("duplicate key")) {
+        return { email: cleanEmail, alreadySubscribed: true };
+      }
+      throw error;
+    }
+  }
+
+  async function getNewsletterSubscribers() {
+    return request("newsletter_subscribers?select=*&order=created_at.desc");
+  }
+
   window.AthletixStore = {
     isConfigured,
     getProducts,
     updateProductStock,
     getOrders,
     createOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    addNewsletterSubscriber,
+    getNewsletterSubscribers
   };
 })();

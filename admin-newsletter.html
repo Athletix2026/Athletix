@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix Admin | Newsletter</title>
+  <meta name="description" content="Liste des emails newsletter Athletix pour relances et prochains drops.">
+  <script src="assets/auth.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script>
+    window.AthletixAuth.requireAdmin();
+  </script>
+  <style>
+    :root {
+      --bg: #080706;
+      --panel: #12100d;
+      --ink: #fff8ec;
+      --muted: #b8aa92;
+      --gold: #d8b365;
+      --gold-2: #f2d27d;
+      --green: #9eff5f;
+      --line: rgba(242,210,125,.16);
+      --line-strong: rgba(216,179,101,.42);
+      --radius: 8px;
+      --shadow: 0 22px 70px rgba(0,0,0,.35), 0 0 38px rgba(216,179,101,.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    html:not(.admin-authorized) body { display: none; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 0%, rgba(216,179,101,.16), transparent 32%),
+        radial-gradient(circle at 90% 10%, rgba(120,50,38,.16), transparent 28%),
+        linear-gradient(180deg, #080706 0%, #100d0a 58%, #070605 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    h1, h2, p { margin: 0; }
+    button, input { font: inherit; }
+
+    .admin-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px;
+      border-right: 1px solid var(--line);
+      background: rgba(7,6,5,.76);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 28px;
+      line-height: .9;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: -.04em;
+    }
+
+    .brand span,
+    .sidebar-footer p {
+      color: var(--gold-2);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 10px;
+      padding-top: 26px;
+      border-top: 1px solid var(--line);
+    }
+
+    .side-nav a,
+    .logout {
+      min-height: 54px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: rgba(255,248,236,.78);
+      background: transparent;
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .side-nav a.active,
+    .side-nav a:hover {
+      color: var(--ink);
+      border-color: var(--line-strong);
+      background: rgba(216,179,101,.1);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .logout {
+      width: 100%;
+      cursor: pointer;
+      color: rgba(255,248,236,.86);
+    }
+
+    .main {
+      padding: 30px clamp(18px, 4vw, 46px);
+      display: grid;
+      gap: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      font-size: clamp(54px, 8vw, 92px);
+      line-height: .82;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+    }
+
+    h1 span { color: var(--gold-2); }
+
+    .sync {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 18px;
+      border: 1px solid rgba(158,255,95,.3);
+      border-radius: 999px;
+      background: rgba(158,255,95,.12);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,248,236,.035), rgba(255,248,236,.012));
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      min-height: 126px;
+      padding: 20px;
+      display: grid;
+      align-content: center;
+      gap: 10px;
+    }
+
+    .stat-card span,
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .stat-card strong {
+      font-size: 42px;
+      line-height: .9;
+    }
+
+    .stat-card small {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .panel-head {
+      min-height: 74px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .panel h2 {
+      font-size: 18px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .field {
+      width: min(340px, 100%);
+      min-height: 44px;
+      padding: 0 18px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(7,6,5,.66);
+      outline: none;
+    }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 720px; border-collapse: collapse; }
+    th, td { padding: 18px 20px; border-bottom: 1px solid var(--line); text-align: left; }
+    td { color: rgba(255,248,236,.88); font-weight: 850; }
+    tbody tr:hover { background: rgba(216,179,101,.06); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(158,255,95,.25);
+      color: var(--green);
+      background: rgba(158,255,95,.08);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .empty {
+      padding: 32px 20px;
+      color: var(--muted);
+      font-weight: 850;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .admin-shell { display: block; }
+      .sidebar {
+        position: relative;
+        height: auto;
+        padding: 14px;
+      }
+      .side-nav {
+        grid-template-columns: repeat(7, max-content);
+        overflow-x: auto;
+      }
+      .sidebar-footer { display: none; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .topbar,
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .main { padding-inline: 12px; }
+      h1 { font-size: 52px; }
+      .field { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar">
+      <a class="brand" href="admin.html">
+        <strong>Athletix</strong>
+        <span>Back office</span>
+      </a>
+
+      <nav class="side-nav" aria-label="Navigation admin">
+        <a href="admin.html">Dashboard <span>01</span></a>
+        <a href="admin-orders.html">Commandes <span>02</span></a>
+        <a href="admin-products.html">Produits <span>03</span></a>
+        <a href="admin-stocks.html">Stocks <span>04</span></a>
+        <a href="admin-clients.html">Clients <span>05</span></a>
+        <a class="active" href="admin-newsletter.html">Newsletter <span>06</span></a>
+        <a href="index.html">Boutique <span>EXT</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout" id="logout" type="button">Deconnexion <span>X</span></button>
+        <p>Emails prets pour relances, drops et offres limitees.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1>Newsletter <span>Athletix</span></h1>
+        <div class="sync" id="syncStatus">Suivi actif</div>
+      </header>
+
+      <section class="stats-grid" aria-label="Resume newsletter">
+        <article class="stat-card">
+          <span>Emails collectes</span>
+          <strong id="subscriberCount">0</strong>
+          <small>Base relance</small>
+        </article>
+        <article class="stat-card">
+          <span>Nouveaux 7 jours</span>
+          <strong id="weekCount">0</strong>
+          <small>Depuis le dernier drop</small>
+        </article>
+        <article class="stat-card">
+          <span>Source principale</span>
+          <strong id="sourceCount">0</strong>
+          <small>Homepage</small>
+        </article>
+      </section>
+
+      <section class="panel" aria-label="Emails newsletter">
+        <div class="panel-head">
+          <h2>Emails inscrits</h2>
+          <input class="field" id="search" type="search" placeholder="Rechercher un email">
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Source</th>
+                <th>Statut</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="subscribersBody"></tbody>
+          </table>
+          <p class="empty" id="emptyState" hidden>Aucun email newsletter pour le moment.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const localKey = "athletixNewsletter";
+    const search = document.querySelector("#search");
+    const body = document.querySelector("#subscribersBody");
+    const emptyState = document.querySelector("#emptyState");
+    const logout = document.querySelector("#logout");
+    const syncStatus = document.querySelector("#syncStatus");
+    let subscribers = [];
+
+    function normalizeLocal(email) {
+      return {
+        email,
+        source: "local",
+        status: "active",
+        created_at: new Date().toISOString()
+      };
+    }
+
+    function loadLocalSubscribers() {
+      try {
+        return JSON.parse(localStorage.getItem(localKey) || "[]").map(normalizeLocal);
+      } catch {
+        return [];
+      }
+    }
+
+    async function loadSubscribers() {
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          syncStatus.textContent = "Connecte Supabase";
+          return await window.AthletixStore.getNewsletterSubscribers();
+        } catch (error) {
+          console.warn("Newsletter Supabase indisponible, retour local.", error);
+          syncStatus.textContent = "Mode local";
+        }
+      }
+      return loadLocalSubscribers();
+    }
+
+    function formatDate(value) {
+      return new Date(value).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    function updateSummary(list) {
+      const now = Date.now();
+      const week = 7 * 24 * 60 * 60 * 1000;
+      document.querySelector("#subscriberCount").textContent = list.length;
+      document.querySelector("#weekCount").textContent = list.filter((item) => now - new Date(item.created_at).getTime() <= week).length;
+      document.querySelector("#sourceCount").textContent = list.filter((item) => item.source === "homepage").length;
+    }
+
+    function renderSubscribers() {
+      const q = search.value.trim().toLowerCase();
+      const filtered = subscribers.filter((item) => Object.values(item).join(" ").toLowerCase().includes(q));
+      body.innerHTML = filtered.map((item) => `
+        <tr>
+          <td>${item.email}</td>
+          <td>${item.source || "homepage"}</td>
+          <td><span class="badge">${item.status || "active"}</span></td>
+          <td>${formatDate(item.created_at || new Date())}</td>
+        </tr>
+      `).join("");
+      emptyState.hidden = filtered.length > 0;
+      updateSummary(subscribers);
+    }
+
+    search.addEventListener("input", renderSubscribers);
+    logout.addEventListener("click", () => {
+      window.AthletixAuth?.clearAuth?.();
+      window.location.href = "index.html";
+    });
+
+    async function initNewsletter() {
+      subscribers = await loadSubscribers();
+      renderSubscribers();
+    }
+
+    initNewsletter();
+  </script>
+</body>
+</html>

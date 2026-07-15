@@ -796,7 +796,7 @@
     }
 
     .trust-card {
-      min-height: 118px;
+      min-height: 96px;
       padding: 18px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -805,8 +805,8 @@
         rgba(7,6,5,.78);
       backdrop-filter: blur(18px);
       display: grid;
-      align-content: space-between;
-      gap: 16px;
+      align-content: center;
+      gap: 12px;
       box-shadow: 0 18px 40px rgba(0,0,0,.22);
     }
 
@@ -825,9 +825,7 @@
     }
 
     .trust-card span {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
+      display: none;
     }
 
     .monitor-stand {
@@ -1126,7 +1124,7 @@
       letter-spacing: .04em;
     }
 
-    .compare { color: #7c715f; text-decoration: line-through; font-weight: 700; }
+    .compare { display: none; }
     .sale { color: var(--acid); }
 
     .swatches, .sizes {
@@ -1636,6 +1634,18 @@
 
     .form input::placeholder { color: rgba(255,248,236,.52); }
 
+    .newsletter-status {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .newsletter-status.is-success { color: var(--acid); }
+    .newsletter-status.is-error { color: #ff8b7f; }
+
     .footer {
       padding: 28px clamp(14px, 4vw, 44px);
       display: flex;
@@ -1885,11 +1895,12 @@
         display: flex;
         flex-direction: column;
       }
+      main > section { order: 20; }
       .lookbook { order: 1; }
       #shop { order: 2; }
       .trust-ribbon { order: 3; }
       #drops { order: 4; }
-      main > .section:nth-of-type(4) { order: 5; }
+      #reviews { order: 5; }
       #faq { order: 6; }
       .newsletter { order: 7; }
       .announcement { min-height: 34px; }
@@ -2000,9 +2011,10 @@
         gap: 8px;
       }
       .trust-card {
-        min-height: 92px;
+        min-height: 78px;
         padding: 12px;
         gap: 8px;
+        align-content: center;
       }
       .trust-card svg {
         width: 20px;
@@ -2012,7 +2024,7 @@
         font-size: 10px;
         letter-spacing: .05em;
       }
-      .trust-card span { font-size: 11px; }
+      .trust-card span { display: none; }
       .hero { padding-top: 24px; }
       h1 { font-size: clamp(44px, 15vw, 70px); }
       .hero-callout { grid-template-columns: 1fr; }
@@ -2354,7 +2366,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section id="reviews" class="section">
       <div class="section-title reveal">
         <h2>Ils doivent se voir acheter dedans.</h2>
       </div>
@@ -2465,10 +2477,11 @@
     <section class="section newsletter">
       <div class="newsletter-inner reveal">
         <h2>Acces avant le prochain drop.</h2>
-        <form class="form">
-          <input type="email" placeholder="ton@email.com" aria-label="Adresse email">
+        <form class="form" id="newsletterForm">
+          <input id="newsletterEmail" type="email" placeholder="ton@email.com" aria-label="Adresse email" required>
           <button class="button primary" type="submit">Me prevenir</button>
         </form>
+        <p class="newsletter-status" id="newsletterStatus" aria-live="polite"></p>
       </div>
     </section>
   </main>
@@ -2685,11 +2698,43 @@
 
     document.querySelectorAll(".reveal, .product-card").forEach((el) => observer.observe(el));
 
-    document.querySelector(".form").addEventListener("submit", (event) => {
+    document.querySelector("#newsletterForm").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const input = event.currentTarget.querySelector("input");
-      input.value = "";
-      input.placeholder = "C'est note.";
+      const form = event.currentTarget;
+      const input = form.querySelector("#newsletterEmail");
+      const button = form.querySelector("button");
+      const status = document.querySelector("#newsletterStatus");
+
+      function setStatus(message, type = "") {
+        status.textContent = message;
+        status.className = `newsletter-status${type ? ` is-${type}` : ""}`;
+      }
+
+      button.disabled = true;
+      button.textContent = "Envoi...";
+      setStatus("");
+
+      try {
+        if (window.AthletixStore?.isConfigured()) {
+          const result = await window.AthletixStore.addNewsletterSubscriber(input.value, "homepage");
+          setStatus(result.alreadySubscribed ? "Deja inscrit au prochain drop." : "Inscription confirmee.", "success");
+        } else {
+          const email = input.value.trim().toLowerCase();
+          const saved = JSON.parse(localStorage.getItem("athletixNewsletter") || "[]");
+          if (!saved.includes(email)) {
+            saved.unshift(email);
+            localStorage.setItem("athletixNewsletter", JSON.stringify(saved));
+          }
+          setStatus("Email garde en local. Supabase prendra le relais en ligne.", "success");
+        }
+        form.reset();
+      } catch (error) {
+        console.warn("Newsletter indisponible.", error);
+        setStatus("Impossible d'inscrire cet email pour le moment.", "error");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Me prevenir";
+      }
     });
   </script>
   <script src="assets/supabase-config.js"></script>
