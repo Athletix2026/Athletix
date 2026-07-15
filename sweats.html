@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix | Sweats oversize</title>
+  <meta name="description" content="Sweat hoodie oversize Athletix en vente.">
+  <link rel="stylesheet" href="assets/auth-ui.css">
+  <style>
+    :root {
+      --bg: #070605;
+      --panel: #13100d;
+      --ink: #fff8ec;
+      --muted: #b8aa92;
+      --soft: #efe0c7;
+      --gold: #d8b365;
+      --gold-2: #f2d27d;
+      --bronze: #9f7432;
+      --line: rgba(242,210,125,.16);
+      --line-strong: rgba(216,179,101,.42);
+      --shadow: 0 0 32px rgba(216,179,101,.34), 0 0 90px rgba(159,116,50,.18);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 8%, rgba(216,179,101,.16), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(143,51,45,.12), transparent 28%),
+        linear-gradient(180deg, #070605 0%, #100d0a 50%, #070605 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body.drawer-open { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+    h1, h2, h3, p { margin: 0; }
+    img { display: block; max-width: 100%; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      pointer-events: none;
+      opacity: .13;
+      background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 100% 4px;
+      mix-blend-mode: screen;
+    }
+
+    .announcement {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--line);
+      background: #100d0a;
+      color: var(--soft);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .announcement b { color: var(--gold-2); }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 70;
+      backdrop-filter: blur(18px);
+      background: rgba(7,6,5,.82);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      height: 74px;
+      padding: 0 clamp(14px, 4vw, 44px);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      width: clamp(138px, 15vw, 220px);
+      min-height: 58px;
+      line-height: .82;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: -.03em;
+      text-shadow: 0 0 22px rgba(216,179,101,.18);
+      overflow: hidden;
+    }
+
+    .brand-wordmark {
+      width: 100%;
+      height: clamp(38px, 4.8vw, 62px);
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+
+    .brand-wordmark img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      object-fit: contain;
+      transform: translate(-50%, -50%);
+      filter: grayscale(1) brightness(1.68) contrast(1.3) drop-shadow(0 0 13px rgba(255,248,236,.18));
+      mix-blend-mode: screen;
+    }
+
+    .brand-wordmark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(7,6,5,1) 0%, transparent 15%, transparent 85%, rgba(7,6,5,1) 100%),
+        linear-gradient(180deg, rgba(7,6,5,1) 0%, transparent 30%, transparent 70%, rgba(7,6,5,1) 100%);
+      pointer-events: none;
+    }
+
+    .brand small {
+      font-size: 8px;
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: .44em;
+      color: var(--gold);
+    }
+
+    .header-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-actions a {
+      color: rgba(255,248,236,.72);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .icon-button {
+      width: 44px;
+      height: 44px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: rgba(216,179,101,.07);
+      color: var(--ink);
+      position: relative;
+      box-shadow: inset 0 0 18px rgba(216,179,101,.08);
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      min-width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--gold-2);
+      color: #100d0a;
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .category-nav {
+      min-height: 48px;
+      padding: 0 clamp(16px, 5vw, 78px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(34px, 9vw, 132px);
+      border-top: 1px solid rgba(242,210,125,.08);
+      background: rgba(4,3,2,.82);
+    }
+
+    .category-nav a {
+      color: rgba(255,248,236,.82);
+      font-size: clamp(12px, 1.15vw, 15px);
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-shadow: 0 0 14px rgba(255,248,236,.16);
+    }
+
+    .category-nav a.active { color: var(--gold-2); }
+
+    .page-hero {
+      min-height: 58vh;
+      padding: clamp(58px, 9vw, 118px) clamp(14px, 4vw, 44px);
+      position: relative;
+      display: grid;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(7,6,5,.94), rgba(7,6,5,.62), rgba(7,6,5,.18)),
+        url("assets/hoodie-front.png") right center / contain no-repeat,
+        #070605;
+    }
+
+    .page-hero::after {
+      content: "ATHLETIX";
+      position: absolute;
+      right: -4vw;
+      bottom: -2vw;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(242,210,125,.12);
+      font-size: clamp(120px, 22vw, 340px);
+      line-height: .8;
+      font-weight: 950;
+      letter-spacing: -.08em;
+      pointer-events: none;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+      width: min(760px, 100%);
+      display: grid;
+      gap: 18px;
+    }
+
+    .kicker {
+      width: max-content;
+      padding: 8px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--gold);
+      background: rgba(216,179,101,.08);
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+    }
+
+    h1 {
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(60px, 10vw, 150px);
+      line-height: .82;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 span { color: var(--gold-2); display: block; }
+
+    .hero-copy p {
+      max-width: 540px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .sales-strip {
+      margin-top: 8px;
+      width: min(620px, 100%);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .sales-strip span {
+      min-height: 56px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.025);
+      color: var(--soft);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .section {
+      padding: clamp(36px, 6vw, 74px) clamp(14px, 4vw, 44px);
+    }
+
+    .products-first {
+      padding-top: clamp(28px, 4vw, 52px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .product-grid {
+      width: min(920px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .single-product {
+      width: min(520px, 100%);
+      grid-template-columns: 1fr;
+    }
+
+    .product-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--line-strong);
+      box-shadow: 0 18px 46px rgba(0,0,0,.35), var(--shadow);
+    }
+
+    .product-media {
+      aspect-ratio: 4 / 5;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 64%, rgba(216,179,101,.26), transparent 32%), #15110d;
+    }
+
+    .product-media::after {
+      content: "";
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      bottom: 9%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(216,179,101,.78);
+      filter: blur(1px);
+      box-shadow: 0 0 26px rgba(216,179,101,.85);
+    }
+
+    .product-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity .35s ease, transform .65s ease;
+    }
+
+    .product-media .hover {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+
+    .product-card:hover .product-media img:first-child {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+
+    .product-card:hover .product-media .hover {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+
+    .label {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 3;
+      padding: 7px 10px;
+      border: 1px solid rgba(216,179,101,.42);
+      border-radius: 999px;
+      background: rgba(7,6,5,.72);
+      color: var(--gold);
+      backdrop-filter: blur(10px);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .product-info {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .product-info h3 {
+      font-size: 16px;
+      line-height: 1.25;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      align-items: center;
+      font-weight: 900;
+    }
+
+    .sale { color: var(--gold-2); }
+    .compare { color: #7c715f; text-decoration: line-through; font-weight: 700; }
+
+    .buy-reasons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .buy-reasons span,
+    .sizes span {
+      padding: 7px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: rgba(255,248,236,.78);
+      background: rgba(255,255,255,.025);
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .swatches, .sizes {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.28);
+      background: #0a0a0a;
+    }
+
+    .swatch.white { background: #f4f4f4; }
+    .swatch.gray { background: #8b8170; }
+
+    .add {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--gold);
+      border-radius: 999px;
+      background: var(--gold);
+      color: #120e09;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .add:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(0,0,0,.58);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 100;
+      width: min(420px, 100%);
+      height: 100%;
+      transform: translateX(100%);
+      transition: transform .25s ease;
+      background: #100d0a;
+      border-left: 1px solid var(--line);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      box-shadow: -30px 0 90px rgba(0,0,0,.45);
+    }
+
+    body.drawer-open .drawer { transform: translateX(0); }
+    body.drawer-open .drawer-backdrop { opacity: 1; pointer-events: auto; }
+
+    .drawer-head, .drawer-foot {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .drawer-foot {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      display: grid;
+    }
+
+    .drawer-close {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink);
+      font-size: 22px;
+    }
+
+    .cart-items {
+      padding: 18px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      overflow: auto;
+    }
+
+    .cart-empty { color: var(--muted); line-height: 1.5; padding-top: 20px; }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.035);
+    }
+
+    .cart-item img {
+      width: 70px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #15110d;
+    }
+
+    .cart-item h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .add:disabled {
+      cursor: not-allowed;
+      opacity: .5;
+      box-shadow: none;
+    }
+
+    .stock-note {
+      color: var(--gold-2);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .cart-item p { color: var(--muted); font-size: 13px; }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--ink);
+      font-weight: 950;
+    }
+
+    .footer {
+      padding: 30px clamp(14px, 4vw, 44px);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    @media (max-width: 760px) {
+      .header-inner { height: 66px; padding-inline: 12px; }
+      .brand { width: 142px; min-height: 50px; }
+      .brand-wordmark { height: 38px; }
+      .brand-wordmark img { width: 100%; }
+      .header-actions a { display: none; }
+      .category-nav {
+        justify-content: flex-start;
+        gap: 28px;
+        min-height: 44px;
+        padding-inline: 14px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .category-nav::-webkit-scrollbar { display: none; }
+      .category-nav a { flex: 0 0 auto; font-size: 11px; }
+      .page-hero { min-height: 480px; background-size: cover; background-position: center bottom; }
+      .sales-strip, .product-grid { grid-template-columns: 1fr; }
+      .button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <div class="announcement"><b>Oversize drop</b>&nbsp; Hoodie Athletix disponible maintenant</div>
+
+  <header class="header">
+    <div class="header-inner">
+      <div></div>
+      <a class="brand" href="index.html" aria-label="Athletix accueil">
+        <span class="brand-wordmark">
+          <img src="assets/athletix-wordmark.png?v=3" alt="">
+        </span>
+        <small>sportswear</small>
+      </a>
+      <div class="header-actions">
+        <a href="index.html#faq">Aide</a>
+        <div class="auth-profile" data-auth-profile hidden></div>
+        <button class="icon-button cart-toggle" type="button" aria-label="Ouvrir le panier">
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none">
+            <path d="M6.5 8.5h11l-.8 10h-9.4l-.8-10Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9 9V7a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span class="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+    <nav class="category-nav" aria-label="Categories principales">
+      <a href="index.html">Accueil</a>
+      <a href="tshirts.html">T-shirts</a>
+      <a class="active" href="sweats.html">Sweats</a>
+      <a href="collections.html">Collections</a>
+      <a href="about.html">A propos</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section products-first">
+      <div class="product-grid single-product">
+        <article class="product-card" data-product-url="product.html?id=sweat-ange-dechu" data-product-id="PROD-HOODIE-ANGE" data-name="Hoodie Oversize - Bleu ciel" data-price="49.99" data-img="assets/hoodie-front.png">
+          <span class="label">Best drop</span>
+          <div class="product-media">
+            <img src="assets/hoodie-front.png" alt="Hoodie oversize bleu ciel Athletix">
+            <img class="hover" src="assets/hoodie-hover.jpg" alt="Dos hoodie oversize bleu ciel Athletix">
+          </div>
+          <div class="product-info">
+            <h3>Hoodie Oversize - Bleu ciel</h3>
+            <div class="price-row"><span class="sale">49,99 EUR</span><span class="compare">69,99 EUR</span></div>
+            <div class="buy-reasons"><span>Oversize</span><span>Epais</span><span>Drop</span></div>
+            <div class="swatches"><span class="swatch gray"></span><span class="swatch white"></span></div>
+            <div class="sizes"><span>S</span><span>M</span><span>L</span><span>XL</span></div>
+            <p class="stock-note" data-stock-for="PROD-HOODIE-ANGE">Stock actif</p>
+            <button class="add" type="button">Ajouter</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page-hero">
+      <div class="hero-copy">
+        <span class="kicker">Athletix oversize</span>
+        <h1>Sweat<br><span>oversize.</span></h1>
+        <p>Le hoodie signature Athletix : coupe ample, matiere epaisse, rendu premium pour l'avant et l'apres seance.</p>
+        <div class="sales-strip">
+          <span>Coupe oversize</span>
+          <span>Matiere epaisse</span>
+          <span>49,99 EUR</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>Athletix</strong>
+    <span>Hoodie oversize Athletix.</span>
+    <span><a href="index.html">Retour accueil</a></span>
+  </footer>
+
+  <div class="drawer-backdrop" aria-hidden="true"></div>
+  <aside class="drawer" aria-label="Panier">
+    <div class="drawer-head">
+      <h2>Panier</h2>
+      <button class="drawer-close" type="button" aria-label="Fermer le panier">×</button>
+    </div>
+    <div class="cart-items">
+      <p class="cart-empty">Ton panier est vide. Ajoute le hoodie pour voir le rendu.</p>
+    </div>
+    <div class="drawer-foot">
+      <div class="total-row"><span>Total</span><span class="cart-total">0,00 EUR</span></div>
+      <button class="add" id="checkoutButton" type="button">Commander</button>
+    </div>
+  </aside>
+
+  <script>
+    const body = document.body;
+    const cartToggle = document.querySelector(".cart-toggle");
+    const drawerClose = document.querySelector(".drawer-close");
+    const drawerBackdrop = document.querySelector(".drawer-backdrop");
+    const cartItems = document.querySelector(".cart-items");
+    const cartCount = document.querySelector(".cart-count");
+    const cartTotal = document.querySelector(".cart-total");
+    const checkoutButton = document.querySelector("#checkoutButton");
+    const cart = [];
+
+    const formatPrice = (value) => `${value.toFixed(2).replace(".", ",")} EUR`;
+    const openCart = () => body.classList.add("drawer-open");
+    const closeCart = () => body.classList.remove("drawer-open");
+
+    function renderCart() {
+      cartCount.textContent = cart.length;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      cartTotal.textContent = formatPrice(total);
+
+      if (!cart.length) {
+        cartItems.innerHTML = '<p class="cart-empty">Ton panier est vide. Ajoute le hoodie pour voir le rendu.</p>';
+        return;
+      }
+
+      cartItems.innerHTML = cart.map((item) => `
+        <article class="cart-item">
+          <img src="${item.img}" alt="">
+          <div>
+            <h3>${item.name}</h3>
+            <p>${formatPrice(item.price)}</p>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function saveLocalOrder() {
+      if (!cart.length) return;
+      const storageKey = "athletixOrders";
+      const saved = localStorage.getItem(storageKey);
+      let orders = [];
+      try {
+        orders = saved ? JSON.parse(saved) : [];
+      } catch {
+        orders = [];
+      }
+      const nextNumber = Math.max(1031, ...orders.map((order) => Number(String(order.id).replace("ATH-", "")) || 0)) + 1;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      orders.unshift({
+        id: "ATH-" + nextNumber,
+        date: "Aujourd'hui maintenant",
+        client: "Client boutique",
+        channel: "Boutique en ligne",
+        product: cart.map((item) => item.name).join(" + "),
+        items: cart.length,
+        total,
+        payment: "Payee",
+        status: "A expedier",
+        shipping: "A confirmer"
+      });
+      localStorage.setItem(storageKey, JSON.stringify(orders));
+    }
+
+    async function saveDemoOrder() {
+      if (!cart.length) return;
+      checkoutButton.disabled = true;
+      checkoutButton.textContent = "Envoi...";
+      let createdInSupabase = false;
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          await window.AthletixStore.createOrder({
+            customer: { fullName: "Client boutique" },
+            paymentMethod: "Demo",
+            items: cart.map((item) => ({
+              productId: item.productId,
+              name: item.name,
+              price: item.price,
+              quantity: 1
+            }))
+          });
+          createdInSupabase = true;
+        } catch (error) {
+          console.warn("Commande Supabase non creee, fallback local.", error);
+        }
+      }
+      if (!createdInSupabase) saveLocalOrder();
+      cart.length = 0;
+      renderCart();
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = createdInSupabase ? "Commande envoyee" : "Commande creee";
+      window.setTimeout(() => {
+        checkoutButton.textContent = "Commander";
+        closeCart();
+      }, 1200);
+    }
+
+    function getProductStock(productId) {
+      const saved = localStorage.getItem("athletixProducts");
+      if (!saved) return null;
+      try {
+        return JSON.parse(saved).find((product) => product.id === productId)?.stock ?? null;
+      } catch {
+        return null;
+      }
+    }
+
+    function updateProductStock() {
+      document.querySelectorAll(".product-card").forEach((card) => {
+        const stock = getProductStock(card.dataset.productId);
+        if (stock === null) return;
+        const note = card.querySelector(".stock-note");
+        const add = card.querySelector(".add");
+        note.textContent = stock > 0 ? `${stock} pieces disponibles` : "Rupture de stock";
+        add.disabled = stock <= 0;
+        add.textContent = stock > 0 ? "Ajouter" : "Indisponible";
+      });
+    }
+
+    document.querySelectorAll(".product-card").forEach((card) => {
+      card.addEventListener("click", (event) => {
+        if (event.target.closest("button, a")) return;
+        if (card.dataset.productUrl) window.location.href = card.dataset.productUrl;
+      });
+    });
+
+    document.querySelectorAll(".product-card .add").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const card = button.closest(".product-card");
+        const stock = getProductStock(card.dataset.productId);
+        if (stock !== null && stock <= 0) return;
+        cart.push({
+          productId: card.dataset.productId,
+          name: card.dataset.name,
+          price: Number(card.dataset.price),
+          img: card.dataset.img
+        });
+        renderCart();
+        openCart();
+      });
+    });
+
+    updateProductStock();
+
+    cartToggle.addEventListener("click", openCart);
+    checkoutButton.addEventListener("click", saveDemoOrder);
+    drawerClose.addEventListener("click", closeCart);
+    drawerBackdrop.addEventListener("click", closeCart);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeCart();
+    });
+  </script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script src="assets/auth.js"></script>
+  <script>
+    window.AthletixAuth.mountProfileMenu();
+  </script>
+</body>
+</html>

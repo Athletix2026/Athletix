@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix Admin | Commandes</title>
+  <meta name="description" content="Page commandes du back-office Athletix.">
+  <script src="assets/auth.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script>
+    window.AthletixAuth.requireAdmin();
+  </script>
+  <style>
+    :root {
+      --page: #f2f1ef;
+      --surface: #ffffff;
+      --surface-2: #f8f7f5;
+      --ink: #23211f;
+      --muted: #6d6860;
+      --line: #dedbd5;
+      --line-strong: #c9c3b8;
+      --dark: #0f0d0a;
+      --gold: #c59b45;
+      --gold-2: #e5c16a;
+      --green: #178744;
+      --green-bg: #e9f7ef;
+      --orange: #a76518;
+      --orange-bg: #fff1dd;
+      --radius: 14px;
+      --shadow: 0 1px 2px rgba(0,0,0,.08), 0 12px 28px rgba(0,0,0,.06);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--page); }
+    html:not(.admin-authorized) body { display: none; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin: 0; }
+    button, input, select { font: inherit; }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 18px 14px;
+      background: #15120e;
+      color: #fff8ec;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      padding: 10px 12px 18px;
+      border-bottom: 1px solid rgba(229,193,106,.2);
+      display: grid;
+      gap: 4px;
+      text-transform: uppercase;
+    }
+
+    .brand strong {
+      font-size: 26px;
+      line-height: .9;
+      letter-spacing: -.03em;
+    }
+
+    .brand span {
+      color: var(--gold-2);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .26em;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .side-nav a,
+    .logout {
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: rgba(255,248,236,.78);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .side-nav a.active,
+    .side-nav a:hover,
+    .logout:hover {
+      color: #fff8ec;
+      border-color: rgba(229,193,106,.28);
+      background: rgba(229,193,106,.12);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 24px clamp(16px, 3vw, 34px) 56px;
+    }
+
+    .topbar {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-icon {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    h1 {
+      font-size: clamp(28px, 3vw, 38px);
+      letter-spacing: -.03em;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .button {
+      min-height: 44px;
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      padding: 0 16px;
+      background: var(--surface);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+      box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    }
+
+    .button.primary {
+      background: var(--dark);
+      color: #fff8ec;
+      border-color: var(--dark);
+    }
+
+    .button.gold {
+      background: linear-gradient(180deg, #f2d27d, #c59b45);
+      border-color: #b98c34;
+      color: #17120b;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 220px repeat(5, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .summary-cell {
+      min-height: 92px;
+      padding: 18px 20px;
+      border-right: 1px solid var(--line);
+      display: grid;
+      align-content: center;
+      gap: 6px;
+    }
+
+    .summary-cell:last-child { border-right: 0; }
+
+    .summary-cell span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .summary-cell strong {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .summary-cell small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 70px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .field,
+    .select {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--ink);
+      padding: 0 12px;
+      outline: none;
+      font-weight: 750;
+    }
+
+    .field { width: min(280px, 42vw); }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      background: var(--surface-2);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    td {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover td { background: #fbf8f0; }
+
+    .order-link {
+      color: #1f4e8c;
+      font-weight: 900;
+    }
+
+    .badge {
+      width: max-content;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      background: #ece8df;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .badge.green { color: var(--green); background: var(--green-bg); }
+    .badge.orange { color: var(--orange); background: var(--orange-bg); }
+    .badge.gold { color: #765616; background: #fff4ce; }
+
+    .status-select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--ink);
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 850;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .detail {
+      position: sticky;
+      top: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-card h3 {
+      font-size: 16px;
+      letter-spacing: -.01em;
+    }
+
+    .detail-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .detail-line strong {
+      color: var(--ink);
+      text-align: right;
+    }
+
+    .empty {
+      min-height: 460px;
+      display: none;
+      place-items: center;
+      text-align: center;
+      padding: 34px;
+    }
+
+    .empty.is-visible { display: grid; }
+
+    .empty-visual {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 18px;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, transparent 52%, #47a69c 52%),
+        #eef0f2;
+      position: relative;
+    }
+
+    .empty-visual::before {
+      content: "";
+      position: absolute;
+      left: 52px;
+      top: 26px;
+      width: 56px;
+      height: 86px;
+      border-radius: 4px;
+      background:
+        linear-gradient(90deg, #3275b9 0 46px, transparent 46px) 10px 12px / 46px 8px no-repeat,
+        linear-gradient(90deg, #cfd4da 0 44px, transparent 44px) 30px 44px / 44px 7px no-repeat,
+        linear-gradient(90deg, #cfd4da 0 30px, transparent 30px) 30px 58px / 30px 7px no-repeat,
+        #fff;
+      box-shadow: 18px 18px 0 rgba(0,0,0,.08);
+    }
+
+    .empty h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .empty p {
+      max-width: 520px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .login {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15,13,10,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .login[hidden] {
+      display: none !important;
+    }
+
+    .login.is-hidden { display: none; }
+
+    .login-card {
+      width: min(440px, 100%);
+      padding: 24px;
+      border-radius: var(--radius);
+      background: #15120e;
+      color: #fff8ec;
+      border: 1px solid rgba(229,193,106,.32);
+      box-shadow: 0 24px 70px rgba(0,0,0,.34);
+      display: grid;
+      gap: 16px;
+    }
+
+    .login-card h2 {
+      font-size: 42px;
+      line-height: .9;
+      text-transform: uppercase;
+    }
+
+    .login-card p { color: rgba(255,248,236,.72); line-height: 1.45; }
+
+    .login-card label {
+      display: grid;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--gold-2);
+    }
+
+    .login-card input {
+      min-height: 48px;
+      padding: 0 12px;
+      border: 1px solid rgba(229,193,106,.26);
+      border-radius: 10px;
+      background: rgba(0,0,0,.28);
+      color: #fff8ec;
+      outline: none;
+    }
+
+    .login-error {
+      min-height: 18px;
+      color: #ff8679;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .side-nav {
+        grid-template-columns: repeat(6, max-content);
+        overflow-x: auto;
+      }
+      .sidebar-footer { display: none; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .content-grid { grid-template-columns: 1fr; }
+      .detail { position: static; }
+    }
+
+    @media (max-width: 680px) {
+      .main { padding-inline: 12px; }
+      .topbar,
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .actions,
+      .filters { justify-content: flex-start; }
+      .summary { grid-template-columns: 1fr; }
+      .summary-cell { border-right: 0; border-bottom: 1px solid var(--line); }
+      .summary-cell:last-child { border-bottom: 0; }
+      .field { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login" id="login" hidden>
+    <form class="login-card" id="loginForm">
+      <div>
+        <h2>Commandes</h2>
+        <p>Acces prive pour consulter les commandes Athletix.</p>
+      </div>
+      <label>
+        Mot de passe admin
+        <input id="password" type="password" autocomplete="current-password" placeholder="Entre le mot de passe">
+      </label>
+      <button class="button gold" type="submit">Entrer</button>
+      <p class="login-error" id="loginError"></p>
+    </form>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="admin.html">
+        <strong>Athletix</strong>
+        <span>Back office</span>
+      </a>
+      <nav class="side-nav" aria-label="Navigation admin">
+        <a href="admin.html">Dashboard <span>01</span></a>
+        <a class="active" href="admin-orders.html">Commandes <span>02</span></a>
+        <a href="admin-products.html">Produits <span>03</span></a>
+        <a href="admin-stocks.html">Stocks <span>04</span></a>
+        <a href="admin-clients.html">Clients <span>05</span></a>
+        <a href="index.html">Boutique <span>EXT</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="logout" id="logout" type="button">Deconnexion <span>X</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <span class="title-icon">O</span>
+          <h1>Commandes</h1>
+        </div>
+        <div class="actions">
+          <button class="button" id="clearDemo" type="button">Vider la demo</button>
+          <button class="button" id="resetDemo" type="button">Recharger</button>
+          <button class="button primary" id="createOrder" type="button">Creer une commande</button>
+        </div>
+      </header>
+
+      <section class="summary" aria-label="Resume des commandes">
+        <div class="summary-cell">
+          <span>Aujourd'hui</span>
+          <strong id="todayCount">0</strong>
+          <small>Commandes du jour</small>
+        </div>
+        <div class="summary-cell">
+          <span>Commandes</span>
+          <strong id="orderCount">0</strong>
+          <small>Total visibles</small>
+        </div>
+        <div class="summary-cell">
+          <span>Articles commandes</span>
+          <strong id="itemCount">0</strong>
+          <small>Pieces vendues</small>
+        </div>
+        <div class="summary-cell">
+          <span>Retours</span>
+          <strong id="returnsCount">0 EUR</strong>
+          <small>Aucun retour actif</small>
+        </div>
+        <div class="summary-cell">
+          <span>Commandes traitees</span>
+          <strong id="fulfilledCount">0</strong>
+          <small>Livrees ou traitees</small>
+        </div>
+        <div class="summary-cell">
+          <span>CA commandes</span>
+          <strong id="revenueCount">0 EUR</strong>
+          <small>Paiements recus</small>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Toutes les commandes</h2>
+            <div class="filters">
+              <input class="field" id="search" type="search" placeholder="Rechercher une commande">
+              <select class="select" id="statusFilter">
+                <option value="all">Tous les statuts</option>
+                <option value="A expedier">A expedier</option>
+                <option value="Expediee">Expediee</option>
+                <option value="Payee">Payee</option>
+                <option value="Livree">Livree</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap" id="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Commande</th>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Canal</th>
+                  <th>Articles</th>
+                  <th>Total</th>
+                  <th>Paiement</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+
+          <div class="empty" id="emptyState">
+            <div>
+              <div class="empty-visual" aria-hidden="true"></div>
+              <h2>Vos commandes s'afficheront ici</h2>
+              <p>C'est ici que vous pourrez traiter les commandes, percevoir les paiements et suivre l'etat des commandes.</p>
+              <button class="button primary" type="button" id="createEmptyOrder">Creer une commande</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="detail">
+          <div class="detail-card">
+            <h3>Commande selectionnee</h3>
+            <div class="detail-line"><span>Commande</span><strong id="detailId">-</strong></div>
+            <div class="detail-line"><span>Client</span><strong id="detailClient">-</strong></div>
+            <div class="detail-line"><span>Produit</span><strong id="detailProduct">-</strong></div>
+            <div class="detail-line"><span>Livraison</span><strong id="detailShipping">-</strong></div>
+            <div class="detail-line"><span>Total</span><strong id="detailTotal">-</strong></div>
+            <button class="button gold" id="markFulfilled" type="button">Marquer comme traitee</button>
+          </div>
+
+          <div class="detail-card">
+            <h3>Connexion future</h3>
+            <p style="color: var(--muted); line-height: 1.5; font-size: 13px;">Cette page est prete pour recevoir les vraies commandes depuis Stripe, Shopify ou Supabase. En demo, les commandes sont stockees dans le navigateur.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const demoOrders = [
+      { id: "ATH-1031", date: "Aujourd'hui 00:24", client: "Lucas M.", channel: "Boutique en ligne", product: "T-shirt compression noir", items: 1, total: 29.99, payment: "Payee", status: "A expedier", shipping: "France - Colissimo" },
+      { id: "ATH-1030", date: "Aujourd'hui 00:12", client: "Nassim B.", channel: "Boutique en ligne", product: "Sweat Ange Dechu", items: 1, total: 49.99, payment: "Payee", status: "A expedier", shipping: "France - Mondial Relay" },
+      { id: "ATH-1029", date: "Hier 22:48", client: "Enzo R.", channel: "Boutique en ligne", product: "T-shirt compression blanc", items: 1, total: 29.99, payment: "Payee", status: "Payee", shipping: "Suisse - Standard" },
+      { id: "ATH-1028", date: "Hier 21:03", client: "Yanis D.", channel: "Boutique en ligne", product: "T-shirt noir + blanc", items: 2, total: 59.98, payment: "Payee", status: "Livree", shipping: "France - Colissimo" },
+      { id: "ATH-1027", date: "12 juil. 18:31", client: "Adam K.", channel: "Boutique en ligne", product: "Sweat Ange Dechu", items: 1, total: 49.99, payment: "Payee", status: "A expedier", shipping: "Belgique - Standard" },
+      { id: "ATH-1026", date: "12 juil. 14:09", client: "Mehdi S.", channel: "Boutique en ligne", product: "T-shirt compression noir", items: 1, total: 29.99, payment: "Payee", status: "Livree", shipping: "France - Point relais" }
+    ];
+
+    const login = document.querySelector("#login");
+    const loginForm = document.querySelector("#loginForm");
+    const loginError = document.querySelector("#loginError");
+    const password = document.querySelector("#password");
+    const logout = document.querySelector("#logout");
+    const search = document.querySelector("#search");
+    const statusFilter = document.querySelector("#statusFilter");
+    const ordersBody = document.querySelector("#ordersBody");
+    const emptyState = document.querySelector("#emptyState");
+    const tableWrap = document.querySelector("#tableWrap");
+    const createOrder = document.querySelector("#createOrder");
+    const createEmptyOrder = document.querySelector("#createEmptyOrder");
+    const resetDemo = document.querySelector("#resetDemo");
+    const clearDemo = document.querySelector("#clearDemo");
+    const markFulfilled = document.querySelector("#markFulfilled");
+    const storageKey = "athletixOrders";
+    let selectedId = null;
+    let ordersCache = [];
+
+    function loadLocalOrders() {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return [...demoOrders];
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [...demoOrders];
+      }
+    }
+
+    function getOrders() {
+      return ordersCache;
+    }
+
+    function saveOrders(orders) {
+      ordersCache = orders;
+      localStorage.setItem(storageKey, JSON.stringify(orders));
+    }
+
+    async function loadOrders() {
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          const supabaseOrders = await window.AthletixStore.getOrders();
+          return supabaseOrders;
+        } catch (error) {
+          console.warn("Supabase commandes indisponible, retour demo.", error);
+        }
+      }
+      return loadLocalOrders();
+    }
+
+    function formatTotal(value) {
+      return value.toFixed(2).replace(".", ",") + " EUR";
+    }
+
+    function badgeClass(value) {
+      if (value === "Livree") return "green";
+      if (value === "Expediee") return "green";
+      if (value === "A expedier") return "orange";
+      if (value === "Payee") return "gold";
+      return "";
+    }
+
+    function filteredOrders() {
+      const q = search.value.trim().toLowerCase();
+      const status = statusFilter.value;
+      return getOrders().filter((order) => {
+        const text = Object.values(order).join(" ").toLowerCase();
+        const matchesText = text.includes(q);
+        const matchesStatus = status === "all" || order.status === status;
+        return matchesText && matchesStatus;
+      });
+    }
+
+    function updateSummary(orders) {
+      const today = orders.filter((order) => order.date.includes("Aujourd'hui")).length;
+      const items = orders.reduce((sum, order) => sum + order.items, 0);
+      const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+      const fulfilled = orders.filter((order) => order.status === "Expediee" || order.status === "Livree").length;
+      document.querySelector("#todayCount").textContent = today;
+      document.querySelector("#orderCount").textContent = orders.length;
+      document.querySelector("#itemCount").textContent = items;
+      document.querySelector("#returnsCount").textContent = "0 EUR";
+      document.querySelector("#fulfilledCount").textContent = fulfilled;
+      document.querySelector("#revenueCount").textContent = formatTotal(revenue);
+    }
+
+    function selectOrder(order) {
+      if (!order) {
+        selectedId = null;
+        document.querySelector("#detailId").textContent = "-";
+        document.querySelector("#detailClient").textContent = "-";
+        document.querySelector("#detailProduct").textContent = "-";
+        document.querySelector("#detailShipping").textContent = "-";
+        document.querySelector("#detailTotal").textContent = "-";
+        return;
+      }
+      selectedId = order.id;
+      document.querySelector("#detailId").textContent = order.id;
+      document.querySelector("#detailClient").textContent = order.client;
+      document.querySelector("#detailProduct").textContent = order.product;
+      document.querySelector("#detailShipping").textContent = order.shipping;
+      document.querySelector("#detailTotal").textContent = formatTotal(order.total);
+    }
+
+    function renderOrders() {
+      const allOrders = getOrders();
+      const orders = filteredOrders();
+      updateSummary(allOrders);
+      tableWrap.style.display = orders.length ? "block" : "none";
+      emptyState.classList.toggle("is-visible", !orders.length);
+      ordersBody.innerHTML = orders.map((order) => `
+        <tr data-id="${order.id}">
+          <td><span class="order-link">${order.id}</span></td>
+          <td>${order.date}</td>
+          <td>${order.client}</td>
+          <td>${order.channel}</td>
+          <td>${order.items} - ${order.product}</td>
+          <td>${formatTotal(order.total)}</td>
+          <td><span class="badge green">${order.payment}</span></td>
+          <td>
+            <select class="status-select" data-status-id="${order.id}" aria-label="Changer le statut de ${order.id}">
+              <option value="A expedier" ${order.status === "A expedier" ? "selected" : ""}>A expedier</option>
+              <option value="Expediee" ${order.status === "Expediee" ? "selected" : ""}>Expediee</option>
+              <option value="Payee" ${order.status === "Payee" ? "selected" : ""}>Payee</option>
+              <option value="Livree" ${order.status === "Livree" ? "selected" : ""}>Livree</option>
+            </select>
+          </td>
+        </tr>
+      `).join("");
+      document.querySelectorAll("tbody tr").forEach((row) => {
+        row.addEventListener("click", () => {
+          const order = getOrders().find((item) => item.id === row.dataset.id);
+          selectOrder(order);
+        });
+      });
+      document.querySelectorAll("[data-status-id]").forEach((select) => {
+        select.addEventListener("click", (event) => event.stopPropagation());
+        select.addEventListener("change", () => {
+          updateOrderStatus(select.dataset.statusId, select.value);
+        });
+      });
+      selectOrder(orders[0]);
+    }
+
+    async function updateOrderStatus(orderId, status) {
+      const currentOrder = getOrders().find((order) => order.id === orderId);
+      const orders = getOrders().map((order) => {
+        if (order.id !== orderId) return order;
+        return { ...order, status };
+      });
+      saveOrders(orders);
+      if (window.AthletixStore?.isConfigured() && currentOrder?.supabaseId) {
+        try {
+          await window.AthletixStore.updateOrderStatus(currentOrder.supabaseId, status);
+        } catch (error) {
+          console.warn("Statut Supabase non mis a jour.", error);
+        }
+      }
+      renderOrders();
+    }
+
+    function createDemoOrder() {
+      const orders = getOrders();
+      const nextNumber = Math.max(...orders.map((order) => Number(order.id.replace("ATH-", ""))), 1031) + 1;
+      const variants = [
+        { product: "T-shirt compression noir", total: 29.99, items: 1 },
+        { product: "T-shirt compression blanc", total: 29.99, items: 1 },
+        { product: "Sweat Ange Dechu", total: 49.99, items: 1 },
+        { product: "T-shirt noir + blanc", total: 59.98, items: 2 }
+      ];
+      const customers = ["Ilyes T.", "Sacha L.", "Rayan P.", "Noah A."];
+      const pick = variants[nextNumber % variants.length];
+      orders.unshift({
+        id: "ATH-" + nextNumber,
+        date: "Aujourd'hui maintenant",
+        client: customers[nextNumber % customers.length],
+        channel: "Boutique en ligne",
+        product: pick.product,
+        items: pick.items,
+        total: pick.total,
+        payment: "Payee",
+        status: "A expedier",
+        shipping: "France - Standard"
+      });
+      saveOrders(orders);
+      renderOrders();
+    }
+
+    function unlock() {
+      sessionStorage.setItem("athletixAdminUnlocked", "true");
+      login.classList.add("is-hidden");
+    }
+
+    function lock() {
+      sessionStorage.removeItem("athletixAdminUnlocked");
+      window.AthletixAuth?.clearAuth?.();
+      window.location.href = "index.html";
+    }
+
+    loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      loginError.textContent = "Connexion par role admin requise.";
+    });
+
+    logout.addEventListener("click", lock);
+    search.addEventListener("input", renderOrders);
+    statusFilter.addEventListener("change", renderOrders);
+    createOrder.addEventListener("click", createDemoOrder);
+    createEmptyOrder.addEventListener("click", createDemoOrder);
+    resetDemo.addEventListener("click", () => {
+      saveOrders([...demoOrders]);
+      renderOrders();
+    });
+    clearDemo.addEventListener("click", () => {
+      saveOrders([]);
+      renderOrders();
+    });
+    markFulfilled.addEventListener("click", () => {
+      if (!selectedId) return;
+      updateOrderStatus(selectedId, "Expediee");
+    });
+
+    async function initOrders() {
+      if (!window.AthletixStore?.isConfigured() && !localStorage.getItem(storageKey)) {
+        localStorage.setItem(storageKey, JSON.stringify(demoOrders));
+      }
+      ordersCache = await loadOrders();
+      renderOrders();
+    }
+
+    initOrders();
+  </script>
+</body>
+</html>

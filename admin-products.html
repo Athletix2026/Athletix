@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix Admin | Produits</title>
+  <meta name="description" content="Page produits du back-office Athletix.">
+  <script src="assets/auth.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script>
+    window.AthletixAuth.requireAdmin();
+  </script>
+  <style>
+    :root {
+      --page: #f2f1ef;
+      --surface: #ffffff;
+      --surface-2: #f8f7f5;
+      --ink: #23211f;
+      --muted: #6d6860;
+      --line: #dedbd5;
+      --line-strong: #c9c3b8;
+      --dark: #0f0d0a;
+      --gold: #c59b45;
+      --gold-2: #e5c16a;
+      --green: #178744;
+      --green-bg: #e9f7ef;
+      --orange: #a76518;
+      --orange-bg: #fff1dd;
+      --red: #b42318;
+      --red-bg: #fff0ee;
+      --radius: 14px;
+      --shadow: 0 1px 2px rgba(0,0,0,.08), 0 12px 28px rgba(0,0,0,.06);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--page); }
+    html:not(.admin-authorized) body { display: none; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin: 0; }
+    button, input, select { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 18px 14px;
+      background: #15120e;
+      color: #fff8ec;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      padding: 10px 12px 18px;
+      border-bottom: 1px solid rgba(229,193,106,.2);
+      display: grid;
+      gap: 4px;
+      text-transform: uppercase;
+    }
+
+    .brand strong {
+      font-size: 26px;
+      line-height: .9;
+      letter-spacing: -.03em;
+    }
+
+    .brand span {
+      color: var(--gold-2);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .26em;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .side-nav a,
+    .logout {
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: rgba(255,248,236,.78);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .side-nav a.active,
+    .side-nav a:hover,
+    .logout:hover {
+      color: #fff8ec;
+      border-color: rgba(229,193,106,.28);
+      background: rgba(229,193,106,.12);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 24px clamp(16px, 3vw, 34px) 56px;
+    }
+
+    .topbar {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-icon {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    h1 {
+      font-size: clamp(28px, 3vw, 38px);
+      letter-spacing: -.03em;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .button {
+      min-height: 44px;
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      padding: 0 16px;
+      background: var(--surface);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+      box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    }
+
+    .button.primary {
+      background: var(--dark);
+      color: #fff8ec;
+      border-color: var(--dark);
+    }
+
+    .button.gold {
+      background: linear-gradient(180deg, #f2d27d, #c59b45);
+      border-color: #b98c34;
+      color: #17120b;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .summary-card {
+      min-height: 112px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      display: grid;
+      align-content: space-between;
+      gap: 14px;
+    }
+
+    .summary-card span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .summary-card strong {
+      font-size: 30px;
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 70px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .field,
+    .select {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--ink);
+      padding: 0 12px;
+      outline: none;
+      font-weight: 750;
+    }
+
+    .field { width: min(300px, 42vw); }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      min-width: 920px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      background: var(--surface-2);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    td {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    tbody tr { cursor: pointer; }
+    tbody tr:hover td { background: #fbf8f0; }
+    tr:last-child td { border-bottom: 0; }
+
+    .product-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .product-cell img {
+      width: 52px;
+      height: 62px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      object-fit: cover;
+      background: #111;
+    }
+
+    .product-cell strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .product-cell span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .badge {
+      width: max-content;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      background: #ece8df;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .badge.green { color: var(--green); background: var(--green-bg); }
+    .badge.orange { color: var(--orange); background: var(--orange-bg); }
+    .badge.red { color: var(--red); background: var(--red-bg); }
+    .badge.gold { color: #765616; background: #fff4ce; }
+
+    .stock-edit {
+      width: 86px;
+      min-height: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--ink);
+      padding: 0 10px;
+      font-weight: 900;
+      outline: none;
+    }
+
+    .stock-edit:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(197,155,69,.16);
+    }
+
+    .detail {
+      position: sticky;
+      top: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #111;
+    }
+
+    .detail-card h3 {
+      font-size: 18px;
+      letter-spacing: -.01em;
+    }
+
+    .detail-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .detail-line strong {
+      color: var(--ink);
+      text-align: right;
+    }
+
+    .empty {
+      min-height: 360px;
+      display: none;
+      place-items: center;
+      text-align: center;
+      padding: 34px;
+    }
+
+    .empty.is-visible { display: grid; }
+
+    .empty h2 { margin-bottom: 10px; font-size: 18px; }
+    .empty p {
+      max-width: 520px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .login {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15,13,10,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .login[hidden] {
+      display: none !important;
+    }
+
+    .login.is-hidden { display: none; }
+
+    .login-card {
+      width: min(440px, 100%);
+      padding: 24px;
+      border-radius: var(--radius);
+      background: #15120e;
+      color: #fff8ec;
+      border: 1px solid rgba(229,193,106,.32);
+      box-shadow: 0 24px 70px rgba(0,0,0,.34);
+      display: grid;
+      gap: 16px;
+    }
+
+    .login-card h2 {
+      font-size: 42px;
+      line-height: .9;
+      text-transform: uppercase;
+    }
+
+    .login-card p { color: rgba(255,248,236,.72); line-height: 1.45; }
+
+    .login-card label {
+      display: grid;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--gold-2);
+    }
+
+    .login-card input {
+      min-height: 48px;
+      padding: 0 12px;
+      border: 1px solid rgba(229,193,106,.26);
+      border-radius: 10px;
+      background: rgba(0,0,0,.28);
+      color: #fff8ec;
+      outline: none;
+    }
+
+    .login-error {
+      min-height: 18px;
+      color: #ff8679;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .side-nav {
+        grid-template-columns: repeat(6, max-content);
+        overflow-x: auto;
+      }
+      .sidebar-footer { display: none; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .content-grid { grid-template-columns: 1fr; }
+      .detail { position: static; }
+    }
+
+    @media (max-width: 680px) {
+      .main { padding-inline: 12px; }
+      .topbar,
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .actions,
+      .filters { justify-content: flex-start; }
+      .summary { grid-template-columns: 1fr; }
+      .field { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login" id="login" hidden>
+    <form class="login-card" id="loginForm">
+      <div>
+        <h2>Produits</h2>
+        <p>Acces prive pour consulter et gerer le catalogue Athletix.</p>
+      </div>
+      <label>
+        Mot de passe admin
+        <input id="password" type="password" autocomplete="current-password" placeholder="Entre le mot de passe">
+      </label>
+      <button class="button gold" type="submit">Entrer</button>
+      <p class="login-error" id="loginError"></p>
+    </form>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="admin.html">
+        <strong>Athletix</strong>
+        <span>Back office</span>
+      </a>
+      <nav class="side-nav" aria-label="Navigation admin">
+        <a href="admin.html">Dashboard <span>01</span></a>
+        <a href="admin-orders.html">Commandes <span>02</span></a>
+        <a class="active" href="admin-products.html">Produits <span>03</span></a>
+        <a href="admin-stocks.html">Stocks <span>04</span></a>
+        <a href="admin-clients.html">Clients <span>05</span></a>
+        <a href="index.html">Boutique <span>EXT</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="logout" id="logout" type="button">Deconnexion <span>X</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <span class="title-icon">P</span>
+          <h1>Produits</h1>
+        </div>
+        <div class="actions">
+          <a class="button" href="collections.html">Voir collections</a>
+          <a class="button" href="tshirts.html">Voir T-shirts</a>
+          <a class="button primary" href="sweats.html">Voir Sweat</a>
+        </div>
+      </header>
+
+      <section class="summary" aria-label="Resume produits">
+        <article class="summary-card">
+          <span>Produits actifs</span>
+          <strong id="activeCount">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Stock total</span>
+          <strong id="stockCount">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Valeur stock</span>
+          <strong id="stockValue">0 EUR</strong>
+        </article>
+        <article class="summary-card">
+          <span>Stock faible</span>
+          <strong id="lowStockCount">0</strong>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Tous les produits</h2>
+            <div class="filters">
+              <input class="field" id="search" type="search" placeholder="Rechercher un produit">
+              <select class="select" id="collectionFilter">
+                <option value="all">Toutes les collections</option>
+                <option value="CompressX">CompressX</option>
+                <option value="Ange Dechu">Ange Dechu</option>
+              </select>
+              <select class="select" id="statusFilter">
+                <option value="all">Tous les statuts</option>
+                <option value="Actif">Actif</option>
+                <option value="Brouillon">Brouillon</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap" id="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Statut</th>
+                  <th>Stock</th>
+                  <th>Prix</th>
+                  <th>Collection</th>
+                  <th>Type</th>
+                  <th>Page</th>
+                </tr>
+              </thead>
+              <tbody id="productsBody"></tbody>
+            </table>
+          </div>
+
+          <div class="empty" id="emptyState">
+            <div>
+              <h2>Aucun produit trouve</h2>
+              <p>Modifie la recherche ou les filtres pour afficher les produits Athletix.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="detail">
+          <div class="detail-card">
+            <img id="detailImg" src="assets/tee-black-front.png" alt="">
+            <h3 id="detailName">Produit</h3>
+            <div class="detail-line"><span>Prix</span><strong id="detailPrice">-</strong></div>
+            <div class="detail-line"><span>Stock</span><strong id="detailStock">-</strong></div>
+            <div class="detail-line"><span>Collection</span><strong id="detailCollection">-</strong></div>
+            <div class="detail-line"><span>Statut</span><strong id="detailStatus">-</strong></div>
+            <a class="button gold" id="detailPage" href="index.html">Ouvrir la page produit</a>
+          </div>
+
+          <div class="detail-card">
+            <h3>Connexion future</h3>
+            <p style="color: var(--muted); line-height: 1.5; font-size: 13px;">Cette page reproduit la logique Shopify. Plus tard, elle pourra etre connectee au stock reel, aux variantes, tailles, images, prix et ventes.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const defaultProducts = [
+      {
+        id: "PROD-COMP-WHITE",
+        name: "T-shirt Compression - Blanc",
+        collection: "CompressX",
+        type: "T-shirt compression",
+        status: "Actif",
+        stock: 32,
+        price: 29.99,
+        compare: 39.99,
+        img: "assets/tee-white-front.png",
+        page: "tshirts.html"
+      },
+      {
+        id: "PROD-COMP-BLACK",
+        name: "T-shirt Compression - Noir",
+        collection: "CompressX",
+        type: "T-shirt compression",
+        status: "Actif",
+        stock: 28,
+        price: 29.99,
+        compare: 39.99,
+        img: "assets/tee-black-front.png",
+        page: "tshirts.html"
+      },
+      {
+        id: "PROD-HOODIE-ANGE",
+        name: "Hoodie Oversize - Bleu ciel",
+        collection: "Ange Dechu",
+        type: "Sweat oversize",
+        status: "Actif",
+        stock: 27,
+        price: 49.99,
+        compare: 69.99,
+        img: "assets/hoodie-front.png",
+        page: "sweats.html"
+      }
+    ];
+
+    const login = document.querySelector("#login");
+    const loginForm = document.querySelector("#loginForm");
+    const loginError = document.querySelector("#loginError");
+    const password = document.querySelector("#password");
+    const logout = document.querySelector("#logout");
+    const search = document.querySelector("#search");
+    const collectionFilter = document.querySelector("#collectionFilter");
+    const statusFilter = document.querySelector("#statusFilter");
+    const productsBody = document.querySelector("#productsBody");
+    const tableWrap = document.querySelector("#tableWrap");
+    const emptyState = document.querySelector("#emptyState");
+    const productStorageKey = "athletixProducts";
+    let products = [];
+
+    function loadLocalProducts() {
+      const saved = localStorage.getItem(productStorageKey);
+      if (!saved) return defaultProducts.map((product) => ({ ...product }));
+      try {
+        const parsed = JSON.parse(saved);
+        return defaultProducts.map((product) => ({ ...product, ...(parsed.find((item) => item.id === product.id) || {}) }));
+      } catch {
+        return defaultProducts.map((product) => ({ ...product }));
+      }
+    }
+
+    async function loadProducts() {
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          const supabaseProducts = await window.AthletixStore.getProducts();
+          if (supabaseProducts.length) return supabaseProducts;
+        } catch (error) {
+          console.warn("Supabase produits indisponible, retour demo.", error);
+        }
+      }
+      return loadLocalProducts();
+    }
+
+    function saveProducts() {
+      localStorage.setItem(productStorageKey, JSON.stringify(products));
+    }
+
+    function formatPrice(value) {
+      return value.toFixed(2).replace(".", ",") + " EUR";
+    }
+
+    function stockBadge(product) {
+      if (product.stock <= 10) return "red";
+      if (product.stock <= 30) return "orange";
+      return "green";
+    }
+
+    function filteredProducts() {
+      const q = search.value.trim().toLowerCase();
+      const collection = collectionFilter.value;
+      const status = statusFilter.value;
+      return products.filter((product) => {
+        const text = Object.values(product).join(" ").toLowerCase();
+        const matchesText = text.includes(q);
+        const matchesCollection = collection === "all" || product.collection === collection;
+        const matchesStatus = status === "all" || product.status === status;
+        return matchesText && matchesCollection && matchesStatus;
+      });
+    }
+
+    function updateSummary() {
+      const active = products.filter((product) => product.status === "Actif").length;
+      const stock = products.reduce((sum, product) => sum + product.stock, 0);
+      const value = products.reduce((sum, product) => sum + product.stock * product.price, 0);
+      const lowStock = products.filter((product) => product.stock <= 30).length;
+      document.querySelector("#activeCount").textContent = active;
+      document.querySelector("#stockCount").textContent = stock;
+      document.querySelector("#stockValue").textContent = formatPrice(value);
+      document.querySelector("#lowStockCount").textContent = lowStock;
+    }
+
+    function selectProduct(product) {
+      if (!product) return;
+      document.querySelector("#detailImg").src = product.img;
+      document.querySelector("#detailImg").alt = product.name;
+      document.querySelector("#detailName").textContent = product.name;
+      document.querySelector("#detailPrice").textContent = formatPrice(product.price);
+      document.querySelector("#detailStock").textContent = product.stock + " pieces";
+      document.querySelector("#detailCollection").textContent = product.collection;
+      document.querySelector("#detailStatus").textContent = product.status;
+      document.querySelector("#detailPage").href = product.page;
+    }
+
+    function renderProducts() {
+      const visibleProducts = filteredProducts();
+      tableWrap.style.display = visibleProducts.length ? "block" : "none";
+      emptyState.classList.toggle("is-visible", !visibleProducts.length);
+      productsBody.innerHTML = visibleProducts.map((product) => `
+        <tr data-id="${product.id}">
+          <td>
+            <div class="product-cell">
+              <img src="${product.img}" alt="">
+              <div>
+                <strong>${product.name}</strong>
+                <span>${product.id}</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge green">${product.status}</span></td>
+          <td>
+            <input class="stock-edit" type="number" min="0" step="1" value="${product.stock}" data-stock-id="${product.id}" aria-label="Stock ${product.name}">
+            <span class="badge ${stockBadge(product)}">${product.stock} en stock</span>
+          </td>
+          <td>${formatPrice(product.price)}</td>
+          <td>${product.collection}</td>
+          <td>${product.type}</td>
+          <td><a class="badge gold" href="${product.page}">Voir</a></td>
+        </tr>
+      `).join("");
+      document.querySelectorAll("tbody tr").forEach((row) => {
+        row.addEventListener("click", (event) => {
+          if (event.target.closest("a")) return;
+          const product = products.find((item) => item.id === row.dataset.id);
+          selectProduct(product);
+        });
+      });
+      document.querySelectorAll(".stock-edit").forEach((input) => {
+        input.addEventListener("click", (event) => event.stopPropagation());
+        input.addEventListener("change", async () => {
+          const product = products.find((item) => item.id === input.dataset.stockId);
+          if (!product) return;
+          const stock = Math.max(0, Number(input.value) || 0);
+          product.stock = stock;
+          if (window.AthletixStore?.isConfigured()) {
+            try {
+              await window.AthletixStore.updateProductStock(product.id, stock);
+            } catch (error) {
+              console.warn("Stock Supabase non mis a jour.", error);
+            }
+          } else {
+            saveProducts();
+          }
+          updateSummary();
+          renderProducts();
+          selectProduct(product);
+        });
+      });
+      selectProduct(visibleProducts[0] || products[0]);
+    }
+
+    function unlock() {
+      sessionStorage.setItem("athletixAdminUnlocked", "true");
+      login.classList.add("is-hidden");
+    }
+
+    function lock() {
+      sessionStorage.removeItem("athletixAdminUnlocked");
+      window.AthletixAuth?.clearAuth?.();
+      window.location.href = "index.html";
+    }
+
+    loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      loginError.textContent = "Connexion par role admin requise.";
+    });
+
+    logout.addEventListener("click", lock);
+    search.addEventListener("input", renderProducts);
+    collectionFilter.addEventListener("change", renderProducts);
+    statusFilter.addEventListener("change", renderProducts);
+
+    async function initProducts() {
+      products = await loadProducts();
+      if (!window.AthletixStore?.isConfigured()) saveProducts();
+      updateSummary();
+      renderProducts();
+    }
+
+    initProducts();
+  </script>
+</body>
+</html>

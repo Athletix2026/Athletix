@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix | Produit</title>
+  <meta name="description" content="Fiche produit Athletix : sportswear premium pour la salle.">
+  <link rel="stylesheet" href="assets/auth-ui.css">
+  <style>
+    :root {
+      --bg: #070605;
+      --panel: #13100d;
+      --ink: #fff8ec;
+      --muted: #b8aa92;
+      --soft: #efe0c7;
+      --gold: #d8b365;
+      --gold-2: #f2d27d;
+      --line: rgba(242,210,125,.16);
+      --line-strong: rgba(216,179,101,.42);
+      --shadow: 0 0 32px rgba(216,179,101,.28), 0 0 90px rgba(159,116,50,.14);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 8%, rgba(216,179,101,.16), transparent 30%),
+        radial-gradient(circle at 82% 0%, rgba(143,51,45,.12), transparent 28%),
+        linear-gradient(180deg, #070605 0%, #100d0a 54%, #070605 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body.drawer-open { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+    h1, h2, h3, p { margin: 0; }
+    img { display: block; max-width: 100%; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      pointer-events: none;
+      opacity: .13;
+      background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 100% 4px;
+      mix-blend-mode: screen;
+    }
+
+    .announcement {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--line);
+      background: #100d0a;
+      color: var(--soft);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .announcement b { color: var(--gold-2); }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 70;
+      backdrop-filter: blur(18px);
+      background: rgba(7,6,5,.82);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      height: 74px;
+      padding: 0 clamp(14px, 4vw, 44px);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      width: clamp(138px, 15vw, 220px);
+      min-height: 58px;
+      overflow: hidden;
+    }
+
+    .brand-wordmark {
+      width: 100%;
+      height: clamp(38px, 4.8vw, 62px);
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+
+    .brand-wordmark img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      object-fit: contain;
+      transform: translate(-50%, -50%);
+      filter: grayscale(1) brightness(1.68) contrast(1.3) drop-shadow(0 0 13px rgba(255,248,236,.18));
+      mix-blend-mode: screen;
+    }
+
+    .brand-wordmark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(7,6,5,1) 0%, transparent 15%, transparent 85%, rgba(7,6,5,1) 100%),
+        linear-gradient(180deg, rgba(7,6,5,1) 0%, transparent 30%, transparent 70%, rgba(7,6,5,1) 100%);
+      pointer-events: none;
+    }
+
+    .brand small {
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .52em;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .cart-count {
+      position: absolute;
+      right: -4px;
+      top: -4px;
+      min-width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--gold-2);
+      color: #080604;
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .category-nav {
+      min-height: 50px;
+      display: flex;
+      justify-content: center;
+      gap: clamp(18px, 6vw, 120px);
+      border-top: 1px solid rgba(242,210,125,.08);
+    }
+
+    .category-nav a {
+      display: flex;
+      align-items: center;
+      color: var(--soft);
+      font-size: 13px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      opacity: .8;
+    }
+
+    .category-nav a.active { color: var(--gold-2); opacity: 1; }
+
+    .product-shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: clamp(24px, 3.4vw, 46px) 0;
+      display: grid;
+      grid-template-columns: minmax(0, .92fr) minmax(340px, .72fr);
+      gap: clamp(18px, 3vw, 36px);
+      align-items: start;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 12px;
+      position: sticky;
+      top: 126px;
+    }
+
+    .thumbs {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .thumb {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      overflow: hidden;
+      opacity: .72;
+    }
+
+    .thumb.active {
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow);
+      opacity: 1;
+    }
+
+    .thumb img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+    }
+
+    .main-media {
+      height: clamp(460px, 55vw, 560px);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 72%, rgba(216,179,101,.22), transparent 32%), #15110d;
+      box-shadow: 0 22px 80px rgba(0,0,0,.34);
+      position: relative;
+    }
+
+    .main-media::after {
+      content: "";
+      position: absolute;
+      left: 16%;
+      right: 16%;
+      bottom: 8%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(216,179,101,.72);
+      filter: blur(1px);
+      box-shadow: 0 0 26px rgba(216,179,101,.78);
+      pointer-events: none;
+    }
+
+    .main-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      padding: clamp(18px, 2.4vw, 26px);
+      display: grid;
+      gap: 16px;
+      box-shadow: 0 22px 80px rgba(0,0,0,.26);
+    }
+
+    .breadcrumb {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+    }
+
+    .kicker {
+      width: fit-content;
+      padding: 7px 11px;
+      border: 1px solid rgba(216,179,101,.42);
+      border-radius: 999px;
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+    }
+
+    h1 {
+      font-size: clamp(36px, 4.9vw, 62px);
+      line-height: .88;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .description {
+      color: var(--muted);
+      font-size: clamp(15px, 1.35vw, 17px);
+      line-height: 1.45;
+      max-width: 52ch;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .sale {
+      color: var(--gold-2);
+      font-size: 25px;
+      font-weight: 950;
+    }
+
+    .compare {
+      color: rgba(239,224,199,.48);
+      font-size: 17px;
+      font-weight: 900;
+      text-decoration: line-through;
+    }
+
+    .stock-note {
+      color: #9dff6c;
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .option-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option-label {
+      color: var(--soft);
+      font-size: 13px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .size-choice {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      color: var(--ink);
+      font-weight: 950;
+    }
+
+    .size-choice.active {
+      border-color: var(--gold-2);
+      background: rgba(216,179,101,.18);
+      box-shadow: var(--shadow);
+    }
+
+    .buy-button {
+      min-height: 54px;
+      border: 1px solid rgba(216,179,101,.6);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f2d27d, #c79c3b);
+      color: #0b0805;
+      font-size: 14px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      box-shadow: var(--shadow);
+    }
+
+    .buy-button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .detail {
+      min-height: 72px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.18);
+      display: grid;
+      align-content: center;
+      gap: 5px;
+    }
+
+    .detail strong {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .detail span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 88;
+      background: rgba(0,0,0,.56);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 90;
+      width: min(440px, 100%);
+      height: 100dvh;
+      background: #0d0a08;
+      border-left: 1px solid var(--line);
+      transform: translateX(100%);
+      transition: transform .32s ease;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    body.drawer-open .drawer { transform: translateX(0); }
+    body.drawer-open .drawer-backdrop { opacity: 1; pointer-events: auto; }
+
+    .drawer-head,
+    .drawer-foot {
+      padding: 22px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .drawer-foot {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      display: grid;
+    }
+
+    .drawer-close {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--ink);
+      font-size: 20px;
+    }
+
+    .cart-items {
+      padding: 22px;
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+    }
+
+    .cart-empty { color: var(--muted); line-height: 1.5; }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .cart-item img {
+      width: 74px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .cart-item strong { display: block; font-size: 14px; }
+    .cart-item span { color: var(--gold-2); font-weight: 950; }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--soft);
+      font-weight: 950;
+    }
+
+    .footer {
+      min-height: 86px;
+      padding: 0 clamp(18px, 5vw, 70px);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-weight: 800;
+    }
+
+    .footer strong { color: var(--ink); text-transform: uppercase; letter-spacing: .12em; }
+
+    @media (max-width: 920px) {
+      .header-inner { grid-template-columns: 1fr auto 1fr; }
+      .header-actions a { display: none; }
+      .category-nav {
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 0 16px;
+        gap: 26px;
+      }
+      .product-shell {
+        grid-template-columns: 1fr;
+        width: min(100% - 24px, 680px);
+      }
+      .gallery {
+        position: static;
+        grid-template-columns: 1fr;
+      }
+      .thumbs {
+        order: 2;
+        display: flex;
+        overflow-x: auto;
+      }
+      .thumb { width: 86px; flex: 0 0 auto; }
+      .main-media { height: min(540px, 118vw); }
+      .details { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="announcement"><b>Drop Athletix</b>&nbsp; livraison offerte des 60 EUR</div>
+
+  <header class="header">
+    <div class="header-inner">
+      <div></div>
+      <a class="brand" href="index.html" aria-label="Athletix accueil">
+        <span class="brand-wordmark">
+          <img src="assets/athletix-wordmark.png?v=3" alt="">
+        </span>
+        <small>sportswear</small>
+      </a>
+      <div class="header-actions">
+        <a href="index.html#faq">Aide</a>
+        <div class="auth-profile" data-auth-profile hidden></div>
+        <button class="icon-button cart-toggle" type="button" aria-label="Ouvrir le panier">
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none">
+            <path d="M6.5 8.5h11l-.8 10h-9.4l-.8-10Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9 9V7a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span class="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+    <nav class="category-nav" aria-label="Categories principales">
+      <a href="index.html">Accueil</a>
+      <a href="tshirts.html">T-shirts</a>
+      <a href="sweats.html">Sweats</a>
+      <a href="collections.html">Collections</a>
+      <a href="about.html">A propos</a>
+    </nav>
+  </header>
+
+  <main class="product-shell">
+    <section class="gallery" aria-label="Images produit">
+      <div class="thumbs">
+        <button class="thumb active" type="button" data-gallery="front"><img alt=""></button>
+        <button class="thumb" type="button" data-gallery="hover"><img alt=""></button>
+      </div>
+      <div class="main-media">
+        <img id="productImage" alt="">
+      </div>
+    </section>
+
+    <section class="product-panel" data-product-card>
+      <a class="breadcrumb" id="backLink" href="collections.html">Collection Athletix</a>
+      <span class="kicker" id="productKicker">Athletix</span>
+      <h1 id="productTitle">Produit Athletix</h1>
+      <p class="description" id="productDescription"></p>
+      <div class="price-row">
+        <span class="sale" id="productPrice"></span>
+        <span class="compare" id="productCompare"></span>
+      </div>
+      <p class="stock-note" id="stockNote">Stock actif</p>
+      <div class="option-group">
+        <span class="option-label">Taille</span>
+        <div class="size-grid" id="sizeGrid"></div>
+      </div>
+      <button class="buy-button" id="addToCartButton" type="button">Ajouter au panier</button>
+      <div class="details" id="productDetails"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>Athletix</strong>
+    <span>Fiche produit premium, prete pour Stripe Checkout.</span>
+    <span><a href="collections.html">Retour collection</a></span>
+  </footer>
+
+  <div class="drawer-backdrop" aria-hidden="true"></div>
+  <aside class="drawer" aria-label="Panier">
+    <div class="drawer-head">
+      <h2>Panier</h2>
+      <button class="drawer-close" type="button" aria-label="Fermer le panier">×</button>
+    </div>
+    <div class="cart-items">
+      <p class="cart-empty">Ton panier est vide.</p>
+    </div>
+    <div class="drawer-foot">
+      <div class="total-row"><span>Total</span><span class="cart-total">0,00 EUR</span></div>
+      <button class="buy-button" id="checkoutButton" type="button">Commander</button>
+    </div>
+  </aside>
+
+  <script>
+    const products = {
+      "tshirt-compression-blanc": {
+        id: "PROD-COMP-WHITE",
+        name: "T-shirt Compression - Blanc",
+        title: "T-shirt compression blanc",
+        kicker: "Compression",
+        description: "Un haut performance clair, ajuste et facile a porter pour les entrainements intensifs. Coupe propre, logo Athletix contraste, rendu premium en salle.",
+        price: 29.99,
+        compare: 39.99,
+        front: "assets/tee-white-front.png",
+        hover: "assets/tee-white-hover.jpg",
+        back: "tshirts.html",
+        details: [
+          ["Coupe", "Compression pres du corps"],
+          ["Couleur", "Blanc logo noir"],
+          ["Usage", "Musculation et fitness"],
+          ["Livraison", "Offerte des 60 EUR"]
+        ]
+      },
+      "tshirt-compression-noir": {
+        id: "PROD-COMP-BLACK",
+        name: "T-shirt Compression - Noir",
+        title: "T-shirt compression noir",
+        kicker: "Core training",
+        description: "Le basique sombre Athletix pour un fit propre en seance. Compression visuelle, logo fort et look facile a associer.",
+        price: 29.99,
+        compare: 39.99,
+        front: "assets/tee-black-front.png",
+        hover: "assets/tee-black-hover.jpg",
+        back: "tshirts.html",
+        details: [
+          ["Coupe", "Compression pres du corps"],
+          ["Couleur", "Noir logo blanc"],
+          ["Usage", "Training quotidien"],
+          ["Livraison", "Offerte des 60 EUR"]
+        ]
+      },
+      "sweat-ange-dechu": {
+        id: "PROD-HOODIE-ANGE",
+        name: "Hoodie Oversize - Bleu ciel",
+        title: "Sweat Ange Dechu",
+        kicker: "Collection",
+        description: "Le hoodie signature Athletix : coupe oversize, matiere epaisse, visuel dos Ange Dechu et presence forte avant comme apres la seance.",
+        price: 49.99,
+        compare: 69.99,
+        front: "assets/hoodie-front.png",
+        hover: "assets/hoodie-hover.jpg",
+        back: "sweats.html",
+        details: [
+          ["Coupe", "Oversize lourd"],
+          ["Design", "Ange Dechu au dos"],
+          ["Usage", "Lifestyle et apres seance"],
+          ["Livraison", "Offerte des 60 EUR"]
+        ]
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("id") || "tshirt-compression-noir";
+    const product = products[slug] || products["tshirt-compression-noir"];
+    const cart = [];
+    let selectedSize = "M";
+
+    const body = document.body;
+    const productImage = document.querySelector("#productImage");
+    const thumbs = document.querySelectorAll(".thumb");
+    const cartToggle = document.querySelector(".cart-toggle");
+    const drawerClose = document.querySelector(".drawer-close");
+    const drawerBackdrop = document.querySelector(".drawer-backdrop");
+    const cartItems = document.querySelector(".cart-items");
+    const cartCount = document.querySelector(".cart-count");
+    const cartTotal = document.querySelector(".cart-total");
+    const checkoutButton = document.querySelector("#checkoutButton");
+    const addToCartButton = document.querySelector("#addToCartButton");
+
+    const formatPrice = (value) => `${value.toFixed(2).replace(".", ",")} EUR`;
+
+    function getProductStock(productId) {
+      const saved = localStorage.getItem("athletixProducts");
+      if (!saved) return null;
+      try {
+        return JSON.parse(saved).find((item) => item.id === productId)?.stock ?? null;
+      } catch {
+        return null;
+      }
+    }
+
+    function renderProduct() {
+      document.title = `Athletix | ${product.name}`;
+      document.querySelector("#productTitle").textContent = product.title;
+      document.querySelector("#productKicker").textContent = product.kicker;
+      document.querySelector("#productDescription").textContent = product.description;
+      document.querySelector("#productPrice").textContent = formatPrice(product.price);
+      document.querySelector("#productCompare").textContent = formatPrice(product.compare);
+      document.querySelector("#backLink").href = product.back;
+      productImage.src = product.front;
+      productImage.alt = product.name;
+      thumbs[0].querySelector("img").src = product.front;
+      thumbs[0].querySelector("img").alt = `${product.name} face`;
+      thumbs[1].querySelector("img").src = product.hover;
+      thumbs[1].querySelector("img").alt = `${product.name} porte`;
+
+      document.querySelector("#sizeGrid").innerHTML = ["S", "M", "L", "XL"].map((size) => (
+        `<button class="size-choice${size === selectedSize ? " active" : ""}" type="button" data-size="${size}">${size}</button>`
+      )).join("");
+
+      document.querySelector("#productDetails").innerHTML = product.details.map(([label, value]) => (
+        `<div class="detail"><strong>${label}</strong><span>${value}</span></div>`
+      )).join("");
+
+      const stock = getProductStock(product.id);
+      const stockNote = document.querySelector("#stockNote");
+      if (stock === null) {
+        stockNote.textContent = "Stock actif";
+        addToCartButton.disabled = false;
+      } else {
+        stockNote.textContent = stock > 0 ? `${stock} pieces disponibles` : "Rupture de stock";
+        addToCartButton.disabled = stock <= 0;
+        addToCartButton.textContent = stock > 0 ? "Ajouter au panier" : "Indisponible";
+      }
+    }
+
+    function openCart() { body.classList.add("drawer-open"); }
+    function closeCart() { body.classList.remove("drawer-open"); }
+
+    function renderCart() {
+      cartCount.textContent = cart.length;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      cartTotal.textContent = formatPrice(total);
+      if (!cart.length) {
+        cartItems.innerHTML = '<p class="cart-empty">Ton panier est vide.</p>';
+        return;
+      }
+      cartItems.innerHTML = cart.map((item) => `
+        <div class="cart-item">
+          <img src="${item.img}" alt="">
+          <div><strong>${item.name}</strong><small>Taille ${item.size}</small><span>${formatPrice(item.price)}</span></div>
+        </div>
+      `).join("");
+    }
+
+    function saveLocalOrder() {
+      if (!cart.length) return;
+      const storageKey = "athletixOrders";
+      const saved = localStorage.getItem(storageKey);
+      let orders = [];
+      try { orders = saved ? JSON.parse(saved) : []; } catch { orders = []; }
+      const nextNumber = Math.max(1031, ...orders.map((order) => Number(String(order.id).replace("ATH-", "")) || 0)) + 1;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      orders.unshift({
+        id: "ATH-" + nextNumber,
+        date: "Aujourd'hui maintenant",
+        client: "Client boutique",
+        channel: "Boutique en ligne",
+        product: cart.map((item) => `${item.name} taille ${item.size}`).join(" + "),
+        items: cart.length,
+        total,
+        payment: "Payee",
+        status: "A expedier",
+        shipping: "A confirmer"
+      });
+      localStorage.setItem(storageKey, JSON.stringify(orders));
+    }
+
+    async function saveDemoOrder() {
+      if (!cart.length) return;
+      checkoutButton.disabled = true;
+      checkoutButton.textContent = "Envoi...";
+      let createdInSupabase = false;
+
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          await window.AthletixStore.createOrder({
+            customer: { fullName: "Client boutique" },
+            paymentMethod: "Demo",
+            items: cart.map((item) => ({
+              productId: item.productId,
+              name: item.name,
+              price: item.price,
+              quantity: 1,
+              size: item.size
+            }))
+          });
+          createdInSupabase = true;
+        } catch (error) {
+          console.warn("Commande Supabase non creee, fallback local.", error);
+        }
+      }
+
+      if (!createdInSupabase) saveLocalOrder();
+      cart.length = 0;
+      renderCart();
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = createdInSupabase ? "Commande envoyee" : "Commande creee";
+      window.setTimeout(() => {
+        checkoutButton.textContent = "Commander";
+        closeCart();
+      }, 1200);
+    }
+
+    renderProduct();
+
+    document.querySelector("#sizeGrid").addEventListener("click", (event) => {
+      const button = event.target.closest(".size-choice");
+      if (!button) return;
+      selectedSize = button.dataset.size;
+      document.querySelectorAll(".size-choice").forEach((item) => item.classList.toggle("active", item === button));
+    });
+
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        thumbs.forEach((item) => item.classList.remove("active"));
+        thumb.classList.add("active");
+        productImage.src = thumb.dataset.gallery === "hover" ? product.hover : product.front;
+      });
+    });
+
+    addToCartButton.addEventListener("click", () => {
+      const stock = getProductStock(product.id);
+      if (stock !== null && stock <= 0) return;
+      cart.push({ productId: product.id, name: product.name, price: product.price, img: product.front, size: selectedSize });
+      renderCart();
+      openCart();
+    });
+
+    cartToggle.addEventListener("click", openCart);
+    checkoutButton.addEventListener("click", saveDemoOrder);
+    drawerClose.addEventListener("click", closeCart);
+    drawerBackdrop.addEventListener("click", closeCart);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeCart();
+    });
+  </script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script src="assets/auth.js"></script>
+  <script>
+    window.AthletixAuth.mountProfileMenu();
+  </script>
+</body>
+</html>

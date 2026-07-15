@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix Admin | Clients</title>
+  <meta name="description" content="Suivi des clients et commandes recentes Athletix.">
+  <script src="assets/auth.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script>
+    window.AthletixAuth.requireAdmin();
+  </script>
+  <style>
+    :root {
+      --bg: #080706;
+      --panel: #12100d;
+      --panel-2: #19150f;
+      --ink: #fff8ec;
+      --muted: #b8aa92;
+      --gold: #d8b365;
+      --gold-2: #f2d27d;
+      --green: #9eff5f;
+      --red: #ff6f61;
+      --line: rgba(242,210,125,.16);
+      --line-strong: rgba(216,179,101,.42);
+      --shadow: 0 22px 70px rgba(0,0,0,.35), 0 0 38px rgba(216,179,101,.12);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    html:not(.admin-authorized) body { display: none; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(216,179,101,.16), transparent 32%),
+        radial-gradient(circle at 94% 8%, rgba(120,50,38,.16), transparent 28%),
+        linear-gradient(180deg, #080706 0%, #100d0a 58%, #070605 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin: 0; }
+    button, input, select { font: inherit; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: .12;
+      background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 100% 4px;
+      mix-blend-mode: screen;
+    }
+
+    .admin-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px;
+      border-right: 1px solid var(--line);
+      background: rgba(7,6,5,.74);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 4px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+      text-transform: uppercase;
+    }
+
+    .brand strong {
+      font-size: 28px;
+      line-height: .9;
+      letter-spacing: -.03em;
+    }
+
+    .brand span {
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .28em;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .side-nav a,
+    .logout {
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: rgba(255,248,236,.74);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .side-nav a.active,
+    .side-nav a:hover,
+    .logout:hover {
+      border-color: var(--line);
+      background: rgba(216,179,101,.08);
+      color: var(--ink);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 22px clamp(14px, 3vw, 34px) 44px;
+    }
+
+    .topbar {
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 24px;
+    }
+
+    .topbar h1 {
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(42px, 5vw, 76px);
+      line-height: .85;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .topbar h1 span { color: var(--gold-2); }
+
+    .status-pill {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid rgba(158,255,95,.28);
+      border-radius: 999px;
+      background: rgba(158,255,95,.08);
+      color: var(--green);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015)), var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      min-height: 124px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+      gap: 16px;
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .stat-card strong {
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: .9;
+      letter-spacing: -.04em;
+    }
+
+    .stat-card small {
+      color: var(--green);
+      font-weight: 850;
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 66px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      font-size: 14px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .field,
+    .select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(0,0,0,.2);
+      color: var(--ink);
+      padding: 0 12px;
+      outline: none;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field::placeholder { color: rgba(255,248,236,.42); }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th, td {
+      padding: 18px 16px;
+      border-bottom: 1px solid rgba(242,210,125,.1);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: rgba(255,248,236,.88);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    tr:hover td { background: rgba(216,179,101,.045); }
+
+    .tag {
+      width: max-content;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+      color: var(--gold-2);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .tag.green {
+      color: var(--green);
+      border-color: rgba(158,255,95,.24);
+      background: rgba(158,255,95,.07);
+    }
+
+    .tag.red {
+      color: var(--red);
+      border-color: rgba(255,111,97,.24);
+      background: rgba(255,111,97,.07);
+    }
+
+    .status-select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(0,0,0,.2);
+      color: var(--ink);
+      padding: 0 10px;
+      outline: none;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .empty {
+      padding: 28px 16px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1040px) {
+      .admin-shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 14px;
+      }
+      .side-nav {
+        grid-template-columns: repeat(7, max-content);
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+      .sidebar-footer { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding-bottom: 16px;
+      }
+      .stats-grid { grid-template-columns: 1fr; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <div class="admin-shell">
+    <aside class="sidebar">
+      <a class="brand" href="admin.html">
+        <strong>Athletix</strong>
+        <span>Back office</span>
+      </a>
+
+      <nav class="side-nav" aria-label="Navigation admin">
+        <a href="admin.html">Dashboard <span>01</span></a>
+        <a href="admin-orders.html">Commandes <span>02</span></a>
+        <a href="admin-products.html">Produits <span>03</span></a>
+        <a href="admin-stocks.html">Stocks <span>04</span></a>
+        <a class="active" href="admin-clients.html">Clients <span>05</span></a>
+        <a href="index.html">Boutique <span>EXT</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout" id="logout" type="button">Deconnexion <span>X</span></button>
+        <p>Liste clients preparee pour connecter les vraies commandes de la boutique.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div>
+          <h1>Clients <span>Athletix</span></h1>
+        </div>
+        <span class="status-pill">Suivi actif</span>
+      </section>
+
+      <section class="stats-grid" aria-label="Indicateurs clients">
+        <article class="stat-card">
+          <span>Clients actifs</span>
+          <strong id="clientCount">0</strong>
+          <small>Depuis le dernier drop</small>
+        </article>
+        <article class="stat-card">
+          <span>Commandes recentes</span>
+          <strong id="orderCount">0</strong>
+          <small id="shippingCount">0 a expedier</small>
+        </article>
+        <article class="stat-card">
+          <span>Panier moyen</span>
+          <strong>39,99 EUR</strong>
+          <small>T-shirts + sweats</small>
+        </article>
+        <article class="stat-card">
+          <span>Clients livres</span>
+          <strong id="deliveredCount">0</strong>
+          <small>Statut finalise</small>
+        </article>
+      </section>
+
+      <section class="panel" aria-label="Commandes recentes par client">
+        <div class="panel-head">
+          <h2>Commandes recentes</h2>
+          <div class="filters">
+            <input class="field" id="search" type="search" placeholder="Rechercher">
+            <select class="select" id="statusFilter">
+              <option value="all">Tous les statuts</option>
+              <option value="A expedier">A expedier</option>
+              <option value="Expediee">Expediee</option>
+              <option value="Payee">Payee</option>
+              <option value="Livree">Livree</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Commande</th>
+                <th>Client</th>
+                <th>Produit</th>
+                <th>Total</th>
+                <th>Paiement</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody"></tbody>
+          </table>
+          <p class="empty" id="emptyState" hidden>Aucun client trouve avec ce filtre.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const demoOrders = [
+      { id: "ATH-1031", client: "Lucas M.", product: "T-shirt compression noir", total: 29.99, payment: "Carte", status: "A expedier" },
+      { id: "ATH-1030", client: "Nassim B.", product: "Sweat Ange Dechu", total: 49.99, payment: "Apple Pay", status: "A expedier" },
+      { id: "ATH-1029", client: "Enzo R.", product: "T-shirt compression blanc", total: 29.99, payment: "Carte", status: "Payee" },
+      { id: "ATH-1028", client: "Yanis D.", product: "T-shirt noir + blanc", total: 59.98, payment: "PayPal", status: "Livree" },
+      { id: "ATH-1027", client: "Adam K.", product: "Sweat Ange Dechu", total: 49.99, payment: "Carte", status: "A expedier" },
+      { id: "ATH-1026", client: "Mehdi S.", product: "T-shirt compression noir", total: 29.99, payment: "Apple Pay", status: "Livree" }
+    ];
+
+    const storageKey = "athletixOrders";
+    const search = document.querySelector("#search");
+    const statusFilter = document.querySelector("#statusFilter");
+    const clientsBody = document.querySelector("#clientsBody");
+    const emptyState = document.querySelector("#emptyState");
+    const logout = document.querySelector("#logout");
+    let ordersCache = [];
+
+    function loadLocalOrders() {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return [...demoOrders];
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [...demoOrders];
+      }
+    }
+
+    function getOrders() {
+      return ordersCache;
+    }
+
+    function saveOrders(orders) {
+      ordersCache = orders;
+      localStorage.setItem(storageKey, JSON.stringify(orders));
+    }
+
+    async function loadOrders() {
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          const supabaseOrders = await window.AthletixStore.getOrders();
+          return supabaseOrders;
+        } catch (error) {
+          console.warn("Supabase clients indisponible, retour demo.", error);
+        }
+      }
+      return loadLocalOrders();
+    }
+
+    function formatTotal(value) {
+      const number = typeof value === "number" ? value : Number(String(value).replace(",", ".").replace(/[^\d.]/g, ""));
+      return number.toFixed(2).replace(".", ",") + " EUR";
+    }
+
+    function paymentLabel(order) {
+      if (order.payment && order.payment !== "Payee") return order.payment;
+      if (order.id === "ATH-1030" || order.id === "ATH-1026") return "Apple Pay";
+      if (order.id === "ATH-1028") return "PayPal";
+      return "Carte";
+    }
+
+    function updateSummary(orders) {
+      document.querySelector("#clientCount").textContent = new Set(orders.map((order) => order.client)).size;
+      document.querySelector("#orderCount").textContent = orders.length;
+      document.querySelector("#shippingCount").textContent = `${orders.filter((order) => order.status === "A expedier").length} a expedier`;
+      document.querySelector("#deliveredCount").textContent = orders.filter((order) => order.status === "Livree").length;
+    }
+
+    function renderClients() {
+      const orders = getOrders();
+      const q = search.value.trim().toLowerCase();
+      const status = statusFilter.value;
+      const filtered = orders.filter((order) => {
+        const text = Object.values(order).join(" ").toLowerCase();
+        const matchesText = text.includes(q);
+        const matchesStatus = status === "all" || order.status === status;
+        return matchesText && matchesStatus;
+      });
+
+      clientsBody.innerHTML = filtered.map((order) => {
+        return `
+          <tr>
+            <td>${order.id}</td>
+            <td>${order.client}</td>
+            <td>${order.product}</td>
+            <td>${formatTotal(order.total)}</td>
+            <td>${paymentLabel(order)}</td>
+            <td>
+              <select class="status-select" data-status-id="${order.id}" aria-label="Changer le statut de ${order.id}">
+                <option value="A expedier" ${order.status === "A expedier" ? "selected" : ""}>A expedier</option>
+                <option value="Expediee" ${order.status === "Expediee" ? "selected" : ""}>Expediee</option>
+                <option value="Payee" ${order.status === "Payee" ? "selected" : ""}>Payee</option>
+                <option value="Livree" ${order.status === "Livree" ? "selected" : ""}>Livree</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      document.querySelectorAll("[data-status-id]").forEach((select) => {
+        select.addEventListener("change", () => {
+          updateOrderStatus(select.dataset.statusId, select.value);
+        });
+      });
+
+      updateSummary(orders);
+      emptyState.hidden = filtered.length > 0;
+    }
+
+    async function updateOrderStatus(orderId, status) {
+      const currentOrder = getOrders().find((order) => order.id === orderId);
+      const orders = getOrders().map((order) => {
+        if (order.id !== orderId) return order;
+        return { ...order, status };
+      });
+      saveOrders(orders);
+      if (window.AthletixStore?.isConfigured() && currentOrder?.supabaseId) {
+        try {
+          await window.AthletixStore.updateOrderStatus(currentOrder.supabaseId, status);
+        } catch (error) {
+          console.warn("Statut Supabase non mis a jour.", error);
+        }
+      }
+      renderClients();
+    }
+
+    search.addEventListener("input", renderClients);
+    statusFilter.addEventListener("change", renderClients);
+    logout.addEventListener("click", () => {
+      window.AthletixAuth?.clearAuth?.();
+      window.location.href = "index.html";
+    });
+
+    async function initClients() {
+      if (!window.AthletixStore?.isConfigured() && !localStorage.getItem(storageKey)) {
+        localStorage.setItem(storageKey, JSON.stringify(demoOrders));
+      }
+      ordersCache = await loadOrders();
+      renderClients();
+    }
+
+    initClients();
+  </script>
+</body>
+</html>

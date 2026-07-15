@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix | Connexion admin</title>
+  <meta name="description" content="Connexion privee au back-office Athletix.">
+  <script src="assets/supabase-config.js"></script>
+  <style>
+    :root {
+      --bg: #070605;
+      --panel: #12100d;
+      --ink: #fff8ec;
+      --muted: #b8aa92;
+      --gold: #d8b365;
+      --gold-2: #f2d27d;
+      --line: rgba(242,210,125,.18);
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(216,179,101,.24), transparent 34%),
+        linear-gradient(180deg, #070605, #120f0b 58%, #070605);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    h1, p { margin: 0; }
+    button, input { font: inherit; }
+
+    .card {
+      width: min(480px, 100%);
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)), var(--panel);
+      box-shadow: 0 28px 80px rgba(0,0,0,.42), 0 0 44px rgba(216,179,101,.13);
+      display: grid;
+      gap: 18px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 5px;
+      text-transform: uppercase;
+    }
+
+    .brand strong {
+      font-size: clamp(44px, 10vw, 72px);
+      line-height: .82;
+      letter-spacing: -.04em;
+    }
+
+    .brand span {
+      color: var(--gold-2);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .26em;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: var(--gold-2);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    input {
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.28);
+      color: var(--ink);
+      outline: none;
+      padding: 0 14px;
+      font-weight: 850;
+    }
+
+    input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(216,179,101,.16);
+    }
+
+    .button {
+      min-height: 52px;
+      border: 1px solid rgba(216,179,101,.48);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f2d27d, #c59b45);
+      color: #120e09;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .secondary {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .error {
+      min-height: 20px;
+      color: #ff8679;
+      font-size: 13px;
+      font-weight: 850;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">
+      <strong>Athletix</strong>
+      <span>Admin access</span>
+    </div>
+    <p>Connexion privee reservee aux administrateurs. Cette page n'est pas visible sur la boutique publique.</p>
+
+    <form id="loginForm">
+      <label>
+        Email administrateur
+        <input id="adminEmail" type="email" autocomplete="email" placeholder="email@athletixshop.com" required>
+      </label>
+      <br>
+      <label>
+        Mot de passe
+        <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Mot de passe Supabase" required>
+      </label>
+      <br>
+      <button class="button" type="submit">Acceder au back-office</button>
+      <p class="error" id="error"></p>
+    </form>
+
+    <a class="secondary" href="index.html">Retour boutique</a>
+  </main>
+
+  <script>
+    const form = document.querySelector("#loginForm");
+    const email = document.querySelector("#adminEmail");
+    const password = document.querySelector("#adminPassword");
+    const error = document.querySelector("#error");
+    const config = window.ATHLETIX_SUPABASE || {};
+    const supabaseUrl = (config.url || "").replace(/\/$/, "");
+    const publishableKey = config.publishableKey || "";
+
+    async function supabaseRequest(path, options = {}, accessToken = "") {
+      const response = await fetch(`${supabaseUrl}${path}`, {
+        ...options,
+        headers: {
+          apikey: publishableKey,
+          Authorization: `Bearer ${accessToken || publishableKey}`,
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : null;
+      if (!response.ok) {
+        throw new Error(data?.msg || data?.message || "Connexion refusee.");
+      }
+      return data;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      error.textContent = "";
+
+      if (!supabaseUrl || !publishableKey) {
+        error.textContent = "Supabase n'est pas encore configure.";
+        return;
+      }
+
+      try {
+        const session = await supabaseRequest("/auth/v1/token?grant_type=password", {
+          method: "POST",
+          body: JSON.stringify({
+            email: email.value.trim(),
+            password: password.value
+          })
+        });
+
+        const profile = await supabaseRequest(`/rest/v1/profiles?select=id,email,full_name,role&id=eq.${session.user.id}`, {}, session.access_token);
+        const adminProfile = profile?.[0];
+
+        if (!adminProfile || adminProfile.role !== "admin") {
+          localStorage.removeItem("athletixUser");
+          localStorage.removeItem("athletixSupabaseSession");
+          error.textContent = "Ce compte n'a pas le role administrateur.";
+          return;
+        }
+
+        localStorage.setItem("athletixSupabaseSession", JSON.stringify(session));
+        localStorage.setItem("athletixUser", JSON.stringify({
+          id: adminProfile.id,
+          email: adminProfile.email,
+          name: adminProfile.full_name || adminProfile.email || "Athletix Admin",
+          role: adminProfile.role
+        }));
+
+        const params = new URLSearchParams(window.location.search);
+        const next = params.get("next") || "admin.html";
+        window.location.href = next;
+      } catch (err) {
+        error.textContent = err.message || "Connexion impossible.";
+      }
+    });
+  </script>
+</body>
+</html>

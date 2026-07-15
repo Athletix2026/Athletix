@@ -1,0 +1,2479 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix | Sportswear performance</title>
+  <meta name="description" content="Athletix, vetements de sport pour la salle : compression, hoodie oversize et drops limites.">
+  <meta property="og:title" content="Athletix Sportswear">
+  <meta property="og:description" content="Une boutique sportswear sombre, premium et orientee performance.">
+  <meta property="og:image" content="assets/hoodie-front.png">
+  <link rel="stylesheet" href="assets/auth-ui.css">
+  <style>
+    :root {
+      --bg: #070605;
+      --panel: #13100d;
+      --panel-2: #1c1711;
+      --ink: #fff8ec;
+      --muted: #b8aa92;
+      --soft: #efe0c7;
+      --cyan: #d8b365;
+      --cyan-2: #9f7432;
+      --acid: #f2d27d;
+      --red: #8f332d;
+      --line: rgba(242,210,125,.16);
+      --line-strong: rgba(216,179,101,.42);
+      --shadow-cyan: 0 0 32px rgba(216,179,101,.34), 0 0 90px rgba(159,116,50,.18);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 8%, rgba(216,179,101,.16), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(143,51,45,.12), transparent 28%),
+        linear-gradient(180deg, #070605 0%, #100d0a 45%, #070605 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body.drawer-open { overflow: hidden; }
+    body.intro-lock { overflow: hidden; }
+    img, video { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button, input, summary { font: inherit; }
+    button { cursor: pointer; }
+    h1, h2, h3, p { margin: 0; }
+
+    .brand-intro {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(216, 179, 101, .14), transparent 28%),
+        radial-gradient(circle at 50% 60%, rgba(230, 194, 118, .12), transparent 34%),
+        #040302;
+      pointer-events: none;
+      animation: introExit .72s cubic-bezier(.77, 0, .18, 1) 2.18s forwards;
+    }
+
+    .brand-intro::before,
+    .brand-intro::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .brand-intro::before {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+      background-size: 100% 4px, 86px 100%;
+      opacity: .16;
+      mix-blend-mode: screen;
+    }
+
+    .brand-intro::after {
+      background:
+        linear-gradient(90deg, transparent, rgba(255, 255, 255, .28), transparent);
+      transform: translateX(-120%);
+      animation: introSweep 1.15s cubic-bezier(.77, 0, .18, 1) .6s forwards;
+      opacity: .34;
+    }
+
+    .brand-intro-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+      transform: translateY(18px) scale(.94);
+      opacity: 0;
+      animation: introLogoIn .72s cubic-bezier(.16, 1, .3, 1) .08s forwards, introLogoHold .72s ease 1.36s forwards;
+    }
+
+    .brand-intro-logo {
+      width: min(560px, 78vw);
+      height: auto;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: visible;
+      color: transparent;
+      text-shadow:
+        0 0 26px rgba(216, 179, 101, .28),
+        0 22px 70px rgba(0, 0, 0, .74);
+    }
+
+    .brand-intro-logo img {
+      position: relative;
+      width: 100%;
+      height: auto;
+      max-width: none;
+      display: block;
+      filter: grayscale(1) brightness(1.72) contrast(1.34) drop-shadow(0 0 24px rgba(255,248,236,.26));
+      mix-blend-mode: screen;
+    }
+
+    .brand-intro-logo::before,
+    .brand-intro-logo::after {
+      content: none;
+    }
+
+    .brand-intro-sub {
+      color: var(--cyan);
+      font-size: clamp(11px, 1.7vw, 18px);
+      font-weight: 950;
+      letter-spacing: .58em;
+      text-transform: uppercase;
+      text-shadow: 0 0 18px rgba(216, 179, 101, .62);
+    }
+
+    .brand-intro-line {
+      width: min(520px, 68vw);
+      height: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .12);
+    }
+
+    .brand-intro-line span {
+      display: block;
+      width: 100%;
+      height: 100%;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, var(--cyan), #e6c276);
+      box-shadow: 0 0 24px rgba(216, 179, 101, .55);
+      animation: introLoad 1.45s cubic-bezier(.77, 0, .18, 1) .38s forwards;
+    }
+
+    .cursor-light {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(216,179,101,.13), transparent 62%);
+      transform: translate3d(-50%, -50%, 0);
+      opacity: .75;
+      mix-blend-mode: screen;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 80;
+      opacity: .13;
+      background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 100% 4px;
+      mix-blend-mode: screen;
+    }
+
+    .announcement {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      background: #100d0a;
+      color: var(--soft);
+      white-space: nowrap;
+    }
+
+    .announcement-track {
+      display: inline-flex;
+      width: max-content;
+      animation: marquee 18s linear infinite;
+    }
+
+    .announcement span {
+      padding: 0 24px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .announcement b { color: var(--cyan); text-shadow: 0 0 16px rgba(216,179,101,.65); }
+
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 70;
+      backdrop-filter: blur(18px);
+      background: rgba(7,6,5,.78);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      height: 74px;
+      padding: 0 clamp(14px, 4vw, 44px);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav, .header-actions {
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 2.2vw, 30px);
+    }
+
+    .header-actions { justify-content: flex-end; }
+
+    .nav a, .header-actions a {
+      color: rgba(255,248,236,.72);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      transition: color .18s ease;
+    }
+
+    .nav a:hover, .header-actions a:hover { color: var(--cyan); }
+
+    .brand {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      width: clamp(138px, 15vw, 220px);
+      min-height: 58px;
+      line-height: .82;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: -.03em;
+      text-shadow: 0 0 22px rgba(216,179,101,.18);
+      overflow: hidden;
+    }
+
+    .brand-wordmark {
+      width: 100%;
+      height: clamp(38px, 4.8vw, 62px);
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+
+    .brand-wordmark img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      object-fit: contain;
+      transform: translate(-50%, -50%);
+      filter: grayscale(1) brightness(1.68) contrast(1.3) drop-shadow(0 0 13px rgba(255,248,236,.18));
+      mix-blend-mode: screen;
+    }
+
+    .brand-wordmark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(7,6,5,1) 0%, transparent 15%, transparent 85%, rgba(7,6,5,1) 100%),
+        linear-gradient(180deg, rgba(7,6,5,1) 0%, transparent 30%, transparent 70%, rgba(7,6,5,1) 100%);
+      pointer-events: none;
+    }
+
+    .brand small {
+      font-size: 8px;
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: .44em;
+      color: var(--cyan);
+    }
+
+    .category-nav {
+      min-height: 48px;
+      padding: 0 clamp(16px, 5vw, 78px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(34px, 9vw, 132px);
+      border-top: 1px solid rgba(242,210,125,.08);
+      background: rgba(4, 3, 2, .82);
+    }
+
+    .category-nav a {
+      color: rgba(255,248,236,.82);
+      font-size: clamp(12px, 1.15vw, 15px);
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-shadow: 0 0 14px rgba(255,248,236,.16);
+      transition: color .18s ease, text-shadow .18s ease;
+    }
+
+    .category-nav a:hover {
+      color: var(--acid);
+      text-shadow: 0 0 18px rgba(216,179,101,.34);
+    }
+
+    .icon-button {
+      width: 44px;
+      height: 44px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: rgba(216,179,101,.07);
+      color: var(--ink);
+      position: relative;
+      box-shadow: inset 0 0 18px rgba(216,179,101,.08);
+    }
+
+    .icon-button:hover { box-shadow: var(--shadow-cyan); }
+
+    .cart-count {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      min-width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--acid);
+      color: #100d0a;
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .hero {
+      min-height: calc(100svh - 112px);
+      padding: clamp(26px, 4vw, 48px) clamp(14px, 4vw, 44px) clamp(38px, 7vw, 82px);
+      display: grid;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .hero::after {
+      content: "ATHLETIX";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: -2;
+      transform: translate(-50%, -50%);
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,.055);
+      font-size: clamp(110px, 23vw, 330px);
+      line-height: .75;
+      font-weight: 950;
+      letter-spacing: -.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 12%;
+      width: min(760px, 78vw);
+      height: 120px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, transparent, rgba(216,179,101,.76), transparent);
+      filter: blur(20px);
+      opacity: .8;
+      z-index: -1;
+      animation: glowPulse 3.8s ease-in-out infinite;
+    }
+
+    .hero-grid {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: .92fr 1.08fr;
+      gap: clamp(24px, 5vw, 70px);
+      align-items: center;
+    }
+
+    .hero-copy {
+      display: grid;
+      gap: 20px;
+      animation: rise .8s ease both;
+    }
+
+    .kicker {
+      width: max-content;
+      padding: 8px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--cyan);
+      background: rgba(216,179,101,.08);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      box-shadow: inset 0 0 18px rgba(216,179,101,.06);
+    }
+
+    h1 {
+      font-size: clamp(48px, 8.2vw, 112px);
+      line-height: .86;
+      letter-spacing: -.055em;
+      text-transform: uppercase;
+      text-wrap: balance;
+    }
+
+    .outline {
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,248,236,.78);
+      text-shadow: none;
+    }
+
+    .hero-copy p {
+      max-width: 560px;
+      color: var(--muted);
+      font-size: clamp(15px, 1.4vw, 18px);
+      line-height: 1.65;
+    }
+
+    .hero-callout {
+      max-width: 580px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid rgba(242,210,125,.34);
+      border-radius: var(--radius);
+      background: rgba(242,210,125,.08);
+      box-shadow: inset 0 0 26px rgba(242,210,125,.045);
+    }
+
+    .hero-callout strong {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--acid);
+      color: #100d0a;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .hero-callout span {
+      color: var(--soft);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .button {
+      min-height: 48px;
+      padding: 0 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: rgba(216,179,101,.08);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-cyan);
+    }
+
+    .button.primary {
+      background: var(--cyan);
+      color: #120e09;
+      border-color: var(--cyan);
+    }
+
+    .button.dark {
+      background: #15110d;
+      border-color: var(--line);
+    }
+
+    .micro-trust {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: rgba(255,248,236,.72);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .micro-trust span {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .proof-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 600px;
+      margin-top: 12px;
+    }
+
+    .proof {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.035);
+    }
+
+    .proof strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .proof span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .hero-categories {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 640px;
+    }
+
+    .hero-category {
+      min-height: 96px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(216,179,101,.09), transparent 44%),
+        rgba(255,255,255,.035);
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+    }
+
+    .hero-category strong {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .hero-category span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .studio {
+      position: relative;
+      min-height: 620px;
+      animation: rise .9s .12s ease both;
+    }
+
+    .showcase {
+      position: absolute;
+      inset: 5% 0 auto;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(7,6,5,.96), rgba(7,6,5,.74) 54%, rgba(7,6,5,.16)),
+        radial-gradient(circle at 74% 48%, rgba(216,179,101,.24), transparent 30%),
+        linear-gradient(135deg, #100d0a, #050403 62%, #1a140d);
+      box-shadow: 0 32px 90px rgba(0,0,0,.55), 0 0 42px rgba(216,179,101,.12);
+      overflow: hidden;
+      transform: perspective(1300px) rotateY(-5deg) rotateX(2deg);
+      transform-origin: center;
+      min-height: 560px;
+    }
+
+    .showcase::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 0 58%, rgba(255,255,255,.055) 61%, transparent 64%),
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: auto, 100% 64px;
+      pointer-events: none;
+    }
+
+    .showcase::after {
+      content: "ATHLETIX";
+      position: absolute;
+      left: clamp(20px, 4vw, 54px);
+      bottom: 20px;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,.07);
+      font-size: clamp(64px, 8vw, 104px);
+      line-height: .8;
+      font-weight: 950;
+      letter-spacing: -.08em;
+      pointer-events: none;
+    }
+
+    .showcase-scene {
+      position: relative;
+      min-height: 560px;
+      padding: clamp(28px, 4vw, 56px);
+    }
+
+    .showcase-copy {
+      position: relative;
+      z-index: 5;
+      max-width: 430px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .showcase-copy h2 {
+      font-size: clamp(36px, 5.1vw, 70px);
+      line-height: .88;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+    }
+
+    .showcase-copy p {
+      color: rgba(255,248,236,.68);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .showcase-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .showcase-tags span {
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--soft);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .showcase-light {
+      content: "";
+      position: absolute;
+      left: 54%;
+      right: 9%;
+      bottom: 54px;
+      height: 14px;
+      background: var(--cyan);
+      border-radius: 999px;
+      box-shadow: 0 0 22px rgba(216,179,101,.9), 0 0 80px rgba(216,179,101,.5);
+      animation: lightSweep 3s ease-in-out infinite;
+    }
+
+    .hero-product {
+      position: absolute;
+      z-index: 3;
+      right: 8%;
+      bottom: 18px;
+      width: min(46%, 390px);
+      max-height: 490px;
+      object-fit: contain;
+      filter: drop-shadow(0 24px 45px rgba(0,0,0,.62));
+      animation: floatProduct 4.5s ease-in-out infinite;
+    }
+
+    .showcase-points {
+      position: relative;
+      z-index: 5;
+      display: grid;
+      gap: 8px;
+      max-width: 390px;
+      margin-top: 0;
+    }
+
+    .showcase-points span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,248,236,.78);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .showcase-points span::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 14px rgba(216,179,101,.76);
+    }
+
+    .showcase-cta {
+      position: absolute;
+      z-index: 7;
+      left: clamp(26px, 4vw, 54px);
+      bottom: 74px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      background: var(--cyan);
+      color: #120e09;
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      box-shadow: var(--shadow-cyan);
+    }
+
+    .product-price-pill {
+      position: absolute;
+      z-index: 7;
+      left: clamp(26px, 4vw, 54px);
+      bottom: 134px;
+      right: auto;
+      top: auto;
+      padding: 10px 12px;
+      border: 1px solid rgba(242,210,125,.38);
+      border-radius: 999px;
+      background: rgba(242,210,125,.1);
+      color: var(--acid);
+      font-size: 13px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 0 0 26px rgba(242,210,125,.14);
+    }
+
+    .trust-ribbon {
+      padding: 0 clamp(14px, 4vw, 44px) clamp(34px, 5vw, 62px);
+      margin-top: -26px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .trust-grid {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .trust-card {
+      min-height: 118px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(216,179,101,.11), transparent 42%),
+        rgba(7,6,5,.78);
+      backdrop-filter: blur(18px);
+      display: grid;
+      align-content: space-between;
+      gap: 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
+    }
+
+    .trust-card svg {
+      color: var(--cyan);
+      filter: drop-shadow(0 0 12px rgba(216,179,101,.5));
+    }
+
+    .trust-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .trust-card span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .monitor-stand {
+      position: absolute;
+      left: 50%;
+      top: 81%;
+      width: 24%;
+      min-width: 130px;
+      height: 80px;
+      transform: translateX(-50%) perspective(400px) rotateX(16deg);
+      background: linear-gradient(180deg, #1a140d, #090705);
+      border-inline: 1px solid rgba(216,179,101,.28);
+      box-shadow: var(--shadow-cyan);
+    }
+
+    .lightbar {
+      position: absolute;
+      left: 10%;
+      right: 8%;
+      bottom: 42px;
+      height: 15px;
+      border-radius: 999px;
+      background: var(--cyan);
+      box-shadow: 0 0 24px rgba(216,179,101,.96), 0 0 90px rgba(216,179,101,.5);
+    }
+
+    .section {
+      padding: clamp(54px, 8vw, 104px) clamp(14px, 4vw, 44px);
+      position: relative;
+    }
+
+    .section-title {
+      width: min(1220px, 100%);
+      margin: 0 auto 26px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .section-title h2 {
+      max-width: 760px;
+      font-size: clamp(34px, 5.8vw, 78px);
+      line-height: .9;
+      letter-spacing: -.05em;
+      text-transform: uppercase;
+    }
+
+    .section-title p {
+      max-width: 390px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .collections {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 16px;
+    }
+
+    .collection {
+      min-height: 560px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #100d0a;
+      isolation: isolate;
+    }
+
+    .collection::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(0deg, rgba(7,6,5,.86), rgba(7,6,5,.12) 58%, rgba(216,179,101,.1));
+    }
+
+    .collection img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      transition: transform .75s ease, filter .75s ease;
+    }
+
+    .collection:hover img {
+      transform: scale(1.05);
+      filter: saturate(1.15) contrast(1.08);
+    }
+
+    .collection-copy {
+      position: absolute;
+      inset: auto 22px 22px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .collection-copy h3 {
+      font-size: clamp(36px, 5.8vw, 76px);
+      line-height: .86;
+      letter-spacing: -.05em;
+      text-transform: uppercase;
+    }
+
+    .collection-copy p {
+      max-width: 460px;
+      color: rgba(255,248,236,.74);
+      line-height: 1.5;
+    }
+
+    .product-grid {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .drop-banner {
+      width: min(1220px, 100%);
+      min-height: 360px;
+      margin: 0 auto 18px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(7,6,5,.95) 0%, rgba(7,6,5,.76) 48%, rgba(7,6,5,.22) 100%),
+        url("assets/lifestyle-nouveaute.jpg") center / cover;
+      box-shadow: 0 26px 70px rgba(0,0,0,.35), var(--shadow-cyan);
+    }
+
+    .drop-banner::after {
+      content: "";
+      position: absolute;
+      inset: auto 9% 28px 9%;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--cyan);
+      box-shadow: 0 0 24px rgba(216,179,101,.9), 0 0 90px rgba(216,179,101,.48);
+    }
+
+    .drop-banner-copy {
+      position: relative;
+      z-index: 4;
+      max-width: 560px;
+      min-height: 360px;
+      padding: clamp(24px, 5vw, 54px);
+      display: grid;
+      align-content: center;
+      gap: 16px;
+      text-shadow: 0 2px 18px rgba(0,0,0,.45);
+    }
+
+    .drop-banner-copy h3 {
+      font-size: clamp(36px, 6vw, 88px);
+      line-height: .85;
+      letter-spacing: -.055em;
+      text-transform: uppercase;
+    }
+
+    .drop-banner-copy p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .product-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .55s ease, transform .55s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+
+    .product-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .product-card:hover {
+      border-color: var(--line-strong);
+      box-shadow: 0 18px 46px rgba(0,0,0,.35), var(--shadow-cyan);
+    }
+
+    .product-card.featured {
+      border-color: rgba(242,210,125,.38);
+      box-shadow: 0 0 42px rgba(242,210,125,.08);
+    }
+
+    .product-media {
+      aspect-ratio: 4 / 5;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 64%, rgba(216,179,101,.26), transparent 32%), #15110d;
+    }
+
+    .product-media::after {
+      content: "";
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      bottom: 9%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(216,179,101,.78);
+      filter: blur(1px);
+      box-shadow: 0 0 26px rgba(216,179,101,.85);
+    }
+
+    .product-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity .35s ease, transform .65s ease;
+    }
+
+    .product-media .hover {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+
+    .product-card:hover .product-media img:first-child {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+
+    .product-card:hover .product-media .hover {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+
+    .label {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 3;
+      padding: 7px 10px;
+      border: 1px solid rgba(216,179,101,.42);
+      border-radius: 999px;
+      background: rgba(7,6,5,.72);
+      color: var(--cyan);
+      backdrop-filter: blur(10px);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .product-info {
+      padding: 17px;
+      display: grid;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .product-info h3 {
+      font-size: 15px;
+      line-height: 1.25;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      align-items: center;
+      font-weight: 900;
+    }
+
+    .buy-reasons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .buy-reasons span {
+      padding: 7px 6px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      color: rgba(255,248,236,.7);
+      background: rgba(255,255,255,.025);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .compare { color: #7c715f; text-decoration: line-through; font-weight: 700; }
+    .sale { color: var(--acid); }
+
+    .swatches, .sizes {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.28);
+      background: #0a0a0a;
+    }
+
+    .swatch.white { background: #f4f4f4; }
+    .swatch.gray { background: #8b8170; }
+
+    .sizes span {
+      min-width: 34px;
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--soft);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .add {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--cyan);
+      border-radius: 999px;
+      background: var(--cyan);
+      color: #120e09;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .add:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-cyan);
+    }
+
+    .add:disabled,
+    .button:disabled {
+      cursor: not-allowed;
+      opacity: .5;
+      box-shadow: none;
+    }
+
+    .lookbook {
+      padding: 0;
+      border-block: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 28%, rgba(221, 178, 96, .14), transparent 30%),
+        linear-gradient(180deg, #020202 0%, #090909 48%, #020202 100%);
+    }
+
+    .lookbook-inner {
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      min-height: min(820px, 88vh);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 43%, rgba(230, 194, 118, .16), transparent 24%),
+        radial-gradient(circle at 4% 74%, rgba(230, 194, 118, .13), transparent 24%),
+        radial-gradient(circle at 94% 24%, rgba(255, 255, 255, .09), transparent 28%),
+        linear-gradient(90deg, #080808 0%, #111 34%, #060606 50%, #101010 68%, #050505 100%);
+      box-shadow: inset 0 0 140px rgba(0, 0, 0, .78);
+    }
+
+    .lookbook-inner::before,
+    .lookbook-inner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .lookbook-inner::before {
+      z-index: 3;
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, .08), rgba(0, 0, 0, .18) 25%, rgba(0, 0, 0, .52) 48%, rgba(0, 0, 0, .18) 71%, rgba(0, 0, 0, .08)),
+        linear-gradient(0deg, rgba(0, 0, 0, .82), transparent 38%, rgba(0, 0, 0, .22));
+    }
+
+    .lookbook-inner::after {
+      z-index: 4;
+      opacity: .12;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, .18) 1px, transparent 1px);
+      background-size: 100% 4px;
+      mix-blend-mode: screen;
+    }
+
+    .lookbook-figure {
+      position: absolute;
+      z-index: 2;
+      bottom: -11%;
+      display: grid;
+      align-items: end;
+      pointer-events: none;
+    }
+
+    .lookbook-figure img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: bottom center;
+      filter: contrast(1.18) saturate(.86) brightness(.82);
+    }
+
+    .lookbook-figure.left {
+      left: 0;
+      width: 45vw;
+      height: 108%;
+    }
+
+    .lookbook-figure.left img {
+      object-position: center bottom;
+      transform: scale(1.1) translateX(-18%) rotate(-1deg);
+      opacity: .92;
+    }
+
+    .lookbook-center {
+      position: relative;
+      z-index: 5;
+      min-height: min(820px, 88vh);
+      width: min(500px, 100%);
+      margin: 0 auto;
+      padding: clamp(58px, 7vw, 92px) 20px 150px;
+      display: grid;
+      align-content: center;
+      justify-items: start;
+      gap: 18px;
+    }
+
+    .lookbook-seal {
+      position: absolute;
+      z-index: 5;
+      top: clamp(62px, 8vw, 112px);
+      left: clamp(48px, 6vw, 92px);
+      width: 118px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(230, 194, 118, .68);
+      border-radius: 50%;
+      color: #e6c276;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .18em;
+      text-align: center;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, .2);
+      box-shadow: inset 0 0 34px rgba(215, 176, 94, .1);
+    }
+
+    .lookbook-eyebrow {
+      color: #e6c276;
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: .36em;
+      text-transform: uppercase;
+    }
+
+    .stock-note {
+      color: var(--gold-2);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .lookbook-center h2 {
+      font-size: clamp(62px, 6vw, 112px);
+      line-height: .82;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      text-shadow: 0 18px 52px rgba(0, 0, 0, .7);
+    }
+
+    .lookbook-center h2 span {
+      display: block;
+      color: #e6c276;
+    }
+
+    .lookbook-center p {
+      max-width: 440px;
+      color: rgba(235, 241, 244, .82);
+      line-height: 1.58;
+      font-size: 16px;
+      text-shadow: 0 10px 28px rgba(0, 0, 0, .7);
+    }
+
+    .lookbook-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .lookbook-actions .button.primary {
+      background: linear-gradient(180deg, #f4d78f, #c99d44);
+      color: #080808;
+      box-shadow: 0 18px 54px rgba(215, 176, 94, .22);
+    }
+
+    .lookbook-actions .button.dark {
+      border-color: rgba(255, 255, 255, .34);
+      background: rgba(0, 0, 0, .3);
+      backdrop-filter: blur(12px);
+    }
+
+    .lookbook-benefits {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      bottom: 58px;
+      width: min(1130px, calc(100% - 120px));
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 12px;
+      background: rgba(8, 8, 8, .74);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 64px rgba(0, 0, 0, .42);
+    }
+
+    .lookbook-benefit {
+      min-height: 82px;
+      padding: 18px 22px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      border-right: 1px solid rgba(255, 255, 255, .1);
+    }
+
+    .lookbook-benefit:last-child {
+      border-right: 0;
+    }
+
+    .lookbook-benefit strong {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .lookbook-benefit span {
+      color: rgba(223, 232, 238, .64);
+      font-size: 12px;
+    }
+
+    .lookbook-mark {
+      position: absolute;
+      z-index: 1;
+      right: 4%;
+      top: 9%;
+      color: rgba(230, 194, 118, .13);
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(210px, 25vw, 410px);
+      line-height: .8;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .lookbook-scroll {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, .42);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .42em;
+      text-transform: uppercase;
+    }
+
+    .review-marquee {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      padding-block: 8px;
+      pointer-events: none;
+      mask-image: linear-gradient(90deg, transparent 0, #000 11%, #000 89%, transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 11%, #000 89%, transparent 100%);
+    }
+
+    .social-proof-panel {
+      width: min(1220px, 100%);
+      margin: 0 auto 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 18px;
+      border: 1px solid rgba(242,210,125,.28);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(242,210,125,.09), transparent 55%),
+        rgba(255,255,255,.035);
+    }
+
+    .social-proof-panel strong {
+      display: block;
+      font-size: clamp(24px, 4vw, 44px);
+      line-height: .92;
+      letter-spacing: -.04em;
+      text-transform: uppercase;
+    }
+
+    .social-proof-panel span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .proof-score {
+      display: grid;
+      place-items: center;
+      min-width: 132px;
+      min-height: 92px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      color: var(--acid);
+      box-shadow: inset 0 0 28px rgba(216,179,101,.08);
+      font-size: 34px;
+      font-weight: 950;
+    }
+
+    .review-marquee::before,
+    .review-marquee::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 3;
+      width: min(150px, 22vw);
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+    }
+
+    .review-marquee::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(7,6,5,.96), rgba(7,6,5,.54), transparent);
+    }
+
+    .review-marquee::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(7,6,5,.96), rgba(7,6,5,.54), transparent);
+    }
+
+    .reviews-track {
+      display: flex;
+      width: max-content;
+      gap: 16px;
+      animation: reviewsScroll 30s linear infinite;
+      animation-play-state: running !important;
+      will-change: transform;
+    }
+
+    .review-marquee:hover .reviews-track,
+    .reviews-track:hover {
+      animation-play-state: running !important;
+    }
+
+    .review {
+      width: clamp(280px, 30vw, 390px);
+      flex: 0 0 auto;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(216,179,101,.08), transparent 42%),
+        rgba(255,255,255,.035);
+      display: grid;
+      gap: 14px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.24);
+      transform: translateZ(0);
+    }
+
+    .review-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--acid));
+      color: #120e09;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .verified {
+      padding: 6px 8px;
+      border: 1px solid rgba(242,210,125,.26);
+      border-radius: 999px;
+      color: var(--acid);
+      background: rgba(242,210,125,.07);
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .stars { color: var(--acid); letter-spacing: .12em; text-shadow: 0 0 14px rgba(242,210,125,.32); }
+    .review p { color: var(--muted); line-height: 1.55; }
+    .review strong {
+      color: var(--ink);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    @keyframes reviewsScroll {
+      to { transform: translateX(calc(-50% - 8px)); }
+    }
+
+    .faq {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.035);
+      padding: 20px;
+    }
+
+    summary {
+      cursor: pointer;
+      list-style: none;
+      color: var(--ink);
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    details p {
+      margin-top: 14px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .newsletter {
+      border-top: 1px solid var(--line);
+      background: linear-gradient(90deg, rgba(216,179,101,.16), rgba(242,210,125,.08), rgba(143,51,45,.08));
+    }
+
+    .newsletter-inner {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 22px;
+      align-items: center;
+    }
+
+    .newsletter h2 {
+      font-size: clamp(34px, 5vw, 68px);
+      line-height: .9;
+      letter-spacing: -.05em;
+      text-transform: uppercase;
+    }
+
+    .form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .form input {
+      min-height: 54px;
+      padding: 0 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: rgba(7,6,5,.7);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .form input::placeholder { color: rgba(255,248,236,.52); }
+
+    .footer {
+      padding: 28px clamp(14px, 4vw, 44px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer strong {
+      color: var(--ink);
+      font-size: 24px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: -.03em;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(0,0,0,.58);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .24s ease;
+    }
+
+    .drawer {
+      position: fixed;
+      inset: 0 0 0 auto;
+      z-index: 100;
+      width: min(430px, 100%);
+      background: #100d0a;
+      border-left: 1px solid var(--line-strong);
+      transform: translateX(100%);
+      transition: transform .28s ease;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      box-shadow: -30px 0 90px rgba(0,0,0,.45);
+    }
+
+    body.drawer-open .drawer { transform: translateX(0); }
+    body.drawer-open .drawer-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer-head, .drawer-foot {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .drawer-foot {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .drawer h2 {
+      font-size: 22px;
+      text-transform: uppercase;
+      letter-spacing: -.02em;
+    }
+
+    .drawer-close {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink);
+      font-size: 22px;
+    }
+
+    .cart-items {
+      padding: 18px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      overflow: auto;
+    }
+
+    .cart-empty {
+      color: var(--muted);
+      line-height: 1.5;
+      padding-top: 20px;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.035);
+    }
+
+    .cart-item img {
+      width: 70px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #15110d;
+    }
+
+    .cart-item h3 {
+      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .cart-item p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--ink);
+      font-weight: 950;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes floatProduct {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(-12px) rotate(1deg); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: .56; transform: translateX(-50%) scaleX(.92); }
+      50% { opacity: 1; transform: translateX(-50%) scaleX(1.08); }
+    }
+
+    @keyframes lightSweep {
+      0%, 100% { opacity: .6; transform: translateX(-4%); }
+      50% { opacity: 1; transform: translateX(4%); }
+    }
+
+    @keyframes introLogoIn {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes introLogoHold {
+      to { transform: translateY(-8px) scale(1.025); }
+    }
+
+    @keyframes introLoad {
+      to { transform: translateX(0); }
+    }
+
+    @keyframes introSweep {
+      to { transform: translateX(120%); }
+    }
+
+    @keyframes introExit {
+      to { opacity: 0; visibility: hidden; transform: scale(1.035); }
+    }
+
+    @media (max-width: 980px) {
+      .header-inner { grid-template-columns: auto 1fr auto; }
+      .brand { justify-self: start; }
+      .nav { display: none; }
+      .category-nav {
+        justify-content: flex-start;
+        gap: 28px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .category-nav::-webkit-scrollbar { display: none; }
+      .hero-grid,
+      .collections,
+      .product-grid,
+      .trust-grid,
+      .newsletter-inner {
+        grid-template-columns: 1fr;
+      }
+      .header-actions a { display: none; }
+      .studio { min-height: 560px; }
+      .showcase { position: relative; inset: auto; transform: none; }
+      .monitor-stand, .lightbar { display: none; }
+      .proof-strip, .hero-categories { grid-template-columns: 1fr; }
+      .trust-ribbon { margin-top: 0; }
+      .drop-banner { min-height: auto; }
+      .drop-banner-copy { min-height: 390px; }
+      .social-proof-panel { grid-template-columns: 1fr; }
+      .proof-score {
+        min-width: 0;
+        min-height: 72px;
+      }
+      .lookbook-inner { min-height: 760px; }
+      .lookbook-center {
+        min-height: 760px;
+        justify-items: center;
+        text-align: center;
+        padding-bottom: 176px;
+      }
+      .lookbook-center p { max-width: 520px; }
+      .lookbook-figure {
+        width: 58%;
+        height: 78%;
+        opacity: .58;
+      }
+      .lookbook-figure.left { left: -18%; }
+      .lookbook-seal {
+        width: 82px;
+        font-size: 9px;
+      }
+      .lookbook-benefits {
+        grid-template-columns: repeat(2, 1fr);
+        bottom: 42px;
+      }
+      .lookbook-benefit:nth-child(2) { border-right: 0; }
+      .lookbook-benefit:nth-child(1),
+      .lookbook-benefit:nth-child(2) { border-bottom: 1px solid rgba(255, 255, 255, .1); }
+    }
+
+    @media (max-width: 620px) {
+      .cursor-light { display: none; }
+      .announcement span { padding: 0 16px; font-size: 11px; }
+      .header-inner { height: 66px; padding-inline: 12px; }
+      .brand { width: 142px; min-height: 50px; }
+      .brand-wordmark { height: 38px; }
+      .brand-wordmark img { width: 100%; }
+      .category-nav {
+        min-height: 44px;
+        padding-inline: 14px;
+      }
+      .category-nav a {
+        flex: 0 0 auto;
+        font-size: 11px;
+      }
+      .hero { padding-top: 24px; }
+      h1 { font-size: clamp(44px, 15vw, 70px); }
+      .hero-callout { grid-template-columns: 1fr; }
+      .studio { min-height: 0; }
+      .showcase { min-height: 620px; }
+      .showcase-scene { min-height: 578px; padding: 22px; }
+      .showcase-copy { max-width: 310px; }
+      .showcase-copy h2 { font-size: 42px; }
+      .showcase-copy p { max-width: 260px; }
+      .hero-product {
+        right: 5%;
+        bottom: 26px;
+        width: 68%;
+      }
+      .product-price-pill {
+        left: 16px;
+        bottom: 212px;
+        font-size: 11px;
+      }
+      .showcase-cta {
+        left: 16px;
+        bottom: 156px;
+      }
+      .section-title { display: grid; }
+      .collection { min-height: 470px; }
+      .drop-banner-copy { min-height: 440px; }
+      .review { width: 292px; }
+      .product-grid { gap: 12px; }
+      .form { grid-template-columns: 1fr; }
+      .button { width: 100%; }
+      .button-row .button { width: auto; }
+    }
+  </style>
+</head>
+<body class="intro-lock">
+  <div class="brand-intro" aria-hidden="true">
+    <div class="brand-intro-inner">
+      <div class="brand-intro-logo">
+        <img src="assets/athletix-wordmark.png?v=4" alt="">
+      </div>
+      <div class="brand-intro-sub">Sportswear</div>
+      <div class="brand-intro-line"><span></span></div>
+    </div>
+  </div>
+  <div class="cursor-light" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+
+  <div class="announcement">
+    <div class="announcement-track">
+      <span><b>Drop limite</b> Ange Dechu</span>
+      <span>Livraison offerte des 60 EUR</span>
+      <span><b>Compression</b> nouvelle generation</span>
+      <span>Retours sous 14 jours</span>
+      <span><b>Drop limite</b> Ange Dechu</span>
+      <span>Livraison offerte des 60 EUR</span>
+      <span><b>Compression</b> nouvelle generation</span>
+      <span>Retours sous 14 jours</span>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="header-inner">
+      <div></div>
+      <a class="brand" href="#" aria-label="Athletix accueil">
+        <span class="brand-wordmark">
+          <img src="assets/athletix-wordmark.png?v=3" alt="">
+        </span>
+        <small>sportswear</small>
+      </a>
+      <div class="header-actions">
+        <a href="#faq">Aide</a>
+        <div class="auth-profile" data-auth-profile hidden></div>
+        <button class="icon-button cart-toggle" type="button" aria-label="Ouvrir le panier">
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none">
+            <path d="M6.5 8.5h11l-.8 10h-9.4l-.8-10Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9 9V7a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span class="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+    <nav class="category-nav" aria-label="Categories principales">
+      <a href="index.html">Accueil</a>
+      <a href="tshirts.html">T-shirts</a>
+      <a href="sweats.html">Sweats</a>
+      <a href="collections.html">Collections</a>
+      <a href="about.html">À propos</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="lookbook" class="lookbook">
+      <div class="lookbook-inner">
+        <div class="lookbook-mark">A</div>
+        <div class="lookbook-seal">Athletix<br>Quality</div>
+        <div class="lookbook-figure left">
+          <img src="assets/tee-black-hover.jpg" alt="T-shirt compression noir Athletix porte">
+        </div>
+        <div class="lookbook-center">
+          <span class="lookbook-eyebrow">Depasse tes limites.</span>
+          <h2>Sport.<br>Style.<br><span>Performance.</span></h2>
+          <p>Athletix, des pieces concues pour ceux qui vivent la salle au quotidien.</p>
+          <div class="lookbook-actions">
+            <a class="button primary" href="#shop">Decouvrir la collection</a>
+            <a class="button dark" href="#drops">Voir le lookbook</a>
+          </div>
+        </div>
+        <div class="lookbook-benefits">
+          <div class="lookbook-benefit"><strong>Qualite premium</strong><span>Matieres selectionnees</span></div>
+          <div class="lookbook-benefit"><strong>Confort optimal</strong><span>Pense pour bouger</span></div>
+          <div class="lookbook-benefit"><strong>Livraison rapide</strong><span>Offerte des 60 EUR</span></div>
+          <div class="lookbook-benefit"><strong>Retours faciles</strong><span>30 jours pour changer</span></div>
+        </div>
+        <div class="lookbook-scroll">Scroll</div>
+      </div>
+    </section>
+
+    <section class="trust-ribbon" aria-label="Garanties Athletix">
+      <div class="trust-grid">
+        <div class="trust-card reveal">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3 19 6v5c0 5-3.1 8.2-7 10-3.9-1.8-7-5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.8"/><path d="m8.8 12 2.1 2.1 4.6-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          <div><strong>Paiement securise</strong><span>Checkout rassurant, experience simple et rapide.</span></div>
+        </div>
+        <div class="trust-card reveal">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 7h11v10H3V7Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 10h3.5l3 3v4H14v-7Z" stroke="currentColor" stroke-width="1.8"/><path d="M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM17.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          <div><strong>Livraison offerte</strong><span>Offerte des 60 EUR pour augmenter le panier moyen.</span></div>
+        </div>
+        <div class="trust-card reveal">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 7h10v10H7V7Z" stroke="currentColor" stroke-width="1.8"/><path d="M4 10V4h6M20 14v6h-6" stroke="currentColor" stroke-width="1.8"/></svg>
+          <div><strong>Retours 14 jours</strong><span>Rassure l'achat impulsif sans friction.</span></div>
+        </div>
+        <div class="trust-card reveal">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 8h14M7 16h10" stroke="currentColor" stroke-width="1.8"/><path d="M4 12c2-2.4 4.7-3.6 8-3.6s6 1.2 8 3.6c-2 2.4-4.7 3.6-8 3.6S6 14.4 4 12Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          <div><strong>Fit verifie</strong><span>Tailles visibles, coupe claire, moins d'hesitation.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="drops" class="section">
+      <div class="section-title reveal">
+        <h2>Drops mis en scene comme un lancement.</h2>
+      </div>
+
+      <div class="collections">
+        <article class="collection reveal">
+          <img src="assets/collection-ange-dechu.png" alt="Collection Ange Dechu Athletix">
+          <div class="collection-copy">
+            <span class="kicker">Collection</span>
+            <h3>Ange Dechu</h3>
+            <p>Un drop graphique avec une identite plus forte, parfait pour creer de la rarete.</p>
+            <a class="button primary" href="sweats.html">Decouvrir</a>
+          </div>
+        </article>
+
+        <article class="collection reveal">
+          <img src="assets/collection-compressx.png" alt="Collection CompressX Athletix">
+          <div class="collection-copy">
+            <span class="kicker">Performance</span>
+            <h3>CompressX</h3>
+            <p>La ligne compression pour afficher une silhouette propre en seance.</p>
+            <a class="button primary" href="tshirts.html">Voir les pieces</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="shop" class="section">
+      <div class="section-title reveal">
+        <h2>Le drop qui doit convertir.</h2>
+      </div>
+
+      <div class="drop-banner reveal">
+        <div class="drop-banner-copy">
+          <span class="kicker">Pack recommande</span>
+          <h3>Hoodie + compression.</h3>
+          <p>Le duo parfait pour augmenter le panier moyen : une piece lifestyle forte et un basique performance facile a acheter.</p>
+          <div class="button-row">
+            <a class="button primary" href="#shop">Composer le pack</a>
+            <a class="button dark" href="#faq">Infos livraison</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-grid">
+        <article class="product-card featured" data-product-url="product.html?id=sweat-ange-dechu" data-product-id="PROD-HOODIE-ANGE" data-name="Hoodie Oversize - Bleu ciel" data-price="49.99" data-img="assets/hoodie-front.png">
+          <span class="label">Best drop</span>
+          <div class="product-media">
+            <img src="assets/hoodie-front.png" alt="Hoodie oversize bleu ciel Athletix">
+            <img class="hover" src="assets/hoodie-hover.jpg" alt="Dos hoodie oversize bleu ciel Athletix">
+          </div>
+          <div class="product-info">
+            <h3>Hoodie Oversize - Bleu ciel</h3>
+            <div class="price-row"><span class="sale">49,99 EUR</span><span class="compare">69,99 EUR</span></div>
+            <div class="buy-reasons"><span>Oversize</span><span>Epais</span><span>Drop</span></div>
+            <div class="swatches"><span class="swatch gray"></span><span class="swatch white"></span></div>
+            <div class="sizes"><span>S</span><span>M</span><span>L</span><span>XL</span></div>
+            <p class="stock-note" data-stock-for="PROD-HOODIE-ANGE">Stock actif</p>
+            <button class="add" type="button">Ajouter</button>
+          </div>
+        </article>
+
+        <article class="product-card" data-product-url="product.html?id=tshirt-compression-blanc" data-product-id="PROD-COMP-WHITE" data-name="T-shirt Compression - Blanc" data-price="29.99" data-img="assets/tee-white-front.png">
+          <span class="label">Compression</span>
+          <div class="product-media">
+            <img src="assets/tee-white-front.png" alt="T-shirt compression blanc Athletix">
+            <img class="hover" src="assets/tee-white-hover.jpg" alt="T-shirt compression blanc porte">
+          </div>
+          <div class="product-info">
+            <h3>T-shirt Compression - Blanc</h3>
+            <div class="price-row"><span class="sale">29,99 EUR</span><span class="compare">39,99 EUR</span></div>
+            <div class="buy-reasons"><span>Fit</span><span>Leger</span><span>Gym</span></div>
+            <div class="swatches"><span class="swatch white"></span><span class="swatch"></span></div>
+            <div class="sizes"><span>S</span><span>M</span><span>L</span><span>XL</span></div>
+            <p class="stock-note" data-stock-for="PROD-COMP-WHITE">Stock actif</p>
+            <button class="add" type="button">Ajouter</button>
+          </div>
+        </article>
+
+        <article class="product-card" data-product-url="product.html?id=tshirt-compression-noir" data-product-id="PROD-COMP-BLACK" data-name="T-shirt Compression - Noir" data-price="29.99" data-img="assets/tee-black-front.png">
+          <span class="label">Core</span>
+          <div class="product-media">
+            <img src="assets/tee-black-front.png" alt="T-shirt compression noir Athletix">
+            <img class="hover" src="assets/tee-black-hover.jpg" alt="T-shirt compression noir porte">
+          </div>
+          <div class="product-info">
+            <h3>T-shirt Compression - Noir</h3>
+            <div class="price-row"><span class="sale">29,99 EUR</span><span class="compare">39,99 EUR</span></div>
+            <div class="buy-reasons"><span>Core</span><span>Propre</span><span>Stable</span></div>
+            <div class="swatches"><span class="swatch"></span><span class="swatch white"></span></div>
+            <div class="sizes"><span>S</span><span>M</span><span>L</span><span>XL</span></div>
+            <p class="stock-note" data-stock-for="PROD-COMP-BLACK">Stock actif</p>
+            <button class="add" type="button">Ajouter</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title reveal">
+        <h2>Ils doivent se voir acheter dedans.</h2>
+      </div>
+      <div class="social-proof-panel reveal">
+        <div>
+          <strong>Social proof en mouvement.</strong>
+        </div>
+        <div class="proof-score">4.9</div>
+      </div>
+      <div class="review-marquee reveal" aria-label="Avis clients defilants">
+        <div class="reviews-track">
+          <article class="review">
+            <div class="review-head"><span class="avatar">KA</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>La coupe du t-shirt compression est propre, surtout aux epaules. Bon rendu en seance.</p>
+            <strong>Karim, client verifie</strong>
+          </article>
+          <article class="review">
+            <div class="review-head"><span class="avatar">NO</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>Le hoodie est epais, oversize comme il faut, et le bleu rend mieux en vrai.</p>
+            <strong>Noah, drop hoodie</strong>
+          </article>
+          <article class="review">
+            <div class="review-head"><span class="avatar">AM</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>Simple a porter, bon maintien, et le noir passe avec tous mes trainings.</p>
+            <strong>Amine, compression noir</strong>
+          </article>
+          <article class="review">
+            <div class="review-head"><span class="avatar">YL</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>J'aime trop le fit, ca serre bien sans bloquer les mouvements pendant la seance.</p>
+            <strong>Ylies, fit compression</strong>
+          </article>
+          <article class="review">
+            <div class="review-head"><span class="avatar">MA</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>La marque fait vraiment plus premium, le hoodie donne direct une vraie identite.</p>
+            <strong>Malik, nouveau client</strong>
+          </article>
+          <article class="review">
+            <div class="review-head"><span class="avatar">IL</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>Recu rapidement, packaging propre, et le t-shirt noir va avec tout.</p>
+            <strong>Ilan, achat verifie</strong>
+          </article>
+          <article class="review" aria-hidden="true">
+            <div class="review-head"><span class="avatar">KA</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>La coupe du t-shirt compression est propre, surtout aux epaules. Bon rendu en seance.</p>
+            <strong>Karim, client verifie</strong>
+          </article>
+          <article class="review" aria-hidden="true">
+            <div class="review-head"><span class="avatar">NO</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>Le hoodie est epais, oversize comme il faut, et le bleu rend mieux en vrai.</p>
+            <strong>Noah, drop hoodie</strong>
+          </article>
+          <article class="review" aria-hidden="true">
+            <div class="review-head"><span class="avatar">AM</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>Simple a porter, bon maintien, et le noir passe avec tous mes trainings.</p>
+            <strong>Amine, compression noir</strong>
+          </article>
+          <article class="review" aria-hidden="true">
+            <div class="review-head"><span class="avatar">YL</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>J'aime trop le fit, ca serre bien sans bloquer les mouvements pendant la seance.</p>
+            <strong>Ylies, fit compression</strong>
+          </article>
+          <article class="review" aria-hidden="true">
+            <div class="review-head"><span class="avatar">MA</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>La marque fait vraiment plus premium, le hoodie donne direct une vraie identite.</p>
+            <strong>Malik, nouveau client</strong>
+          </article>
+          <article class="review" aria-hidden="true">
+            <div class="review-head"><span class="avatar">IL</span><span class="verified">Verifie</span></div>
+            <div class="stars">★★★★★</div>
+            <p>Recu rapidement, packaging propre, et le t-shirt noir va avec tout.</p>
+            <strong>Ilan, achat verifie</strong>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="section-title reveal">
+        <h2>Questions rapides.</h2>
+      </div>
+      <div class="faq">
+        <details class="reveal">
+          <summary>Quels sont les delais de livraison ?</summary>
+          <p>Les commandes sont preparees rapidement. La livraison est offerte des 60 EUR d'achat.</p>
+        </details>
+        <details class="reveal">
+          <summary>Comment choisir ma taille ?</summary>
+          <p>Prends ta taille habituelle pour un fit compression. Pour le hoodie, la coupe est oversize.</p>
+        </details>
+        <details class="reveal">
+          <summary>Peut-on retourner un produit ?</summary>
+          <p>Oui, les retours sont possibles sous 14 jours si l'article est neuf et non porte.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="section newsletter">
+      <div class="newsletter-inner reveal">
+        <h2>Acces avant le prochain drop.</h2>
+        <form class="form">
+          <input type="email" placeholder="ton@email.com" aria-label="Adresse email">
+          <button class="button primary" type="submit">Me prevenir</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>Athletix</strong>
+    <span>Sportswear, compression et drops limites.</span>
+    <span>Demo creative pour refonte Shopify.</span>
+  </footer>
+
+  <div class="drawer-backdrop" aria-hidden="true"></div>
+  <aside class="drawer" aria-label="Panier">
+    <div class="drawer-head">
+      <h2>Panier</h2>
+      <button class="drawer-close" type="button" aria-label="Fermer le panier">×</button>
+    </div>
+    <div class="cart-items">
+      <p class="cart-empty">Ton panier est vide. Ajoute une piece du drop pour voir le rendu.</p>
+    </div>
+    <div class="drawer-foot">
+      <div class="total-row"><span>Total</span><span class="cart-total">0,00 EUR</span></div>
+      <button class="button primary" id="checkoutButton" type="button">Commander</button>
+    </div>
+  </aside>
+
+  <script>
+    const body = document.body;
+    const brandIntro = document.querySelector(".brand-intro");
+    const cursorLight = document.querySelector(".cursor-light");
+    const cartToggle = document.querySelector(".cart-toggle");
+    const drawerClose = document.querySelector(".drawer-close");
+    const drawerBackdrop = document.querySelector(".drawer-backdrop");
+    const cartItems = document.querySelector(".cart-items");
+    const cartCount = document.querySelector(".cart-count");
+    const cartTotal = document.querySelector(".cart-total");
+    const checkoutButton = document.querySelector("#checkoutButton");
+    const cart = [];
+
+    const introAlreadySeen = sessionStorage.getItem("athletixIntroSeen") === "true";
+    const introDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 300 : 2950;
+
+    if (introAlreadySeen) {
+      body.classList.remove("intro-lock");
+      brandIntro?.remove();
+    } else {
+      sessionStorage.setItem("athletixIntroSeen", "true");
+      window.setTimeout(() => {
+        body.classList.remove("intro-lock");
+        brandIntro?.remove();
+      }, introDuration);
+    }
+
+    window.addEventListener("pointermove", (event) => {
+      if (!cursorLight) return;
+      cursorLight.style.transform = `translate3d(${event.clientX - 210}px, ${event.clientY - 210}px, 0)`;
+    });
+
+    const formatPrice = (value) => `${value.toFixed(2).replace(".", ",")} EUR`;
+
+    function openCart() {
+      body.classList.add("drawer-open");
+    }
+
+    function closeCart() {
+      body.classList.remove("drawer-open");
+    }
+
+    function renderCart() {
+      cartCount.textContent = cart.length;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      cartTotal.textContent = formatPrice(total);
+
+      if (!cart.length) {
+        cartItems.innerHTML = '<p class="cart-empty">Ton panier est vide. Ajoute une piece du drop pour voir le rendu.</p>';
+        return;
+      }
+
+      cartItems.innerHTML = cart.map((item) => `
+        <article class="cart-item">
+          <img src="${item.img}" alt="">
+          <div>
+            <h3>${item.name}</h3>
+            <p>${formatPrice(item.price)}</p>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function saveLocalOrder() {
+      if (!cart.length) return;
+      const storageKey = "athletixOrders";
+      const saved = localStorage.getItem(storageKey);
+      let orders = [];
+      try {
+        orders = saved ? JSON.parse(saved) : [];
+      } catch {
+        orders = [];
+      }
+      const nextNumber = Math.max(1031, ...orders.map((order) => Number(String(order.id).replace("ATH-", "")) || 0)) + 1;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      orders.unshift({
+        id: "ATH-" + nextNumber,
+        date: "Aujourd'hui maintenant",
+        client: "Client boutique",
+        channel: "Boutique en ligne",
+        product: cart.map((item) => item.name).join(" + "),
+        items: cart.length,
+        total,
+        payment: "Payee",
+        status: "A expedier",
+        shipping: "A confirmer"
+      });
+      localStorage.setItem(storageKey, JSON.stringify(orders));
+    }
+
+    async function saveDemoOrder() {
+      if (!cart.length) return;
+      checkoutButton.disabled = true;
+      checkoutButton.textContent = "Envoi...";
+      let createdInSupabase = false;
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          await window.AthletixStore.createOrder({
+            customer: { fullName: "Client boutique" },
+            paymentMethod: "Demo",
+            items: cart.map((item) => ({
+              productId: item.productId,
+              name: item.name,
+              price: item.price,
+              quantity: 1
+            }))
+          });
+          createdInSupabase = true;
+        } catch (error) {
+          console.warn("Commande Supabase non creee, fallback local.", error);
+        }
+      }
+      if (!createdInSupabase) saveLocalOrder();
+      cart.length = 0;
+      renderCart();
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = createdInSupabase ? "Commande envoyee" : "Commande creee";
+      window.setTimeout(() => {
+        checkoutButton.textContent = "Commander";
+        closeCart();
+      }, 1200);
+    }
+
+    function getProductStock(productId) {
+      const saved = localStorage.getItem("athletixProducts");
+      if (!saved) return null;
+      try {
+        return JSON.parse(saved).find((product) => product.id === productId)?.stock ?? null;
+      } catch {
+        return null;
+      }
+    }
+
+    function updateProductStock() {
+      document.querySelectorAll(".product-card").forEach((card) => {
+        const stock = getProductStock(card.dataset.productId);
+        if (stock === null) return;
+        const note = card.querySelector(".stock-note");
+        const add = card.querySelector(".add");
+        if (!note || !add) return;
+        note.textContent = stock > 0 ? `${stock} pieces disponibles` : "Rupture de stock";
+        add.disabled = stock <= 0;
+        add.textContent = stock > 0 ? "Ajouter" : "Indisponible";
+      });
+    }
+
+    document.querySelectorAll(".product-card").forEach((card) => {
+      card.addEventListener("click", (event) => {
+        if (event.target.closest("button, a")) return;
+        if (card.dataset.productUrl) window.location.href = card.dataset.productUrl;
+      });
+    });
+
+    document.querySelectorAll(".add").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const card = button.closest(".product-card");
+        const stock = getProductStock(card.dataset.productId);
+        if (stock !== null && stock <= 0) return;
+        cart.push({
+          productId: card.dataset.productId,
+          name: card.dataset.name,
+          price: Number(card.dataset.price),
+          img: card.dataset.img
+        });
+        renderCart();
+        openCart();
+      });
+    });
+
+    updateProductStock();
+
+    cartToggle.addEventListener("click", openCart);
+    checkoutButton.addEventListener("click", saveDemoOrder);
+    drawerClose.addEventListener("click", closeCart);
+    drawerBackdrop.addEventListener("click", closeCart);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeCart();
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18 });
+
+    document.querySelectorAll(".reveal, .product-card").forEach((el) => observer.observe(el));
+
+    document.querySelector(".form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = event.currentTarget.querySelector("input");
+      input.value = "";
+      input.placeholder = "C'est note.";
+    });
+  </script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script src="assets/auth.js"></script>
+  <script>
+    window.AthletixAuth.mountProfileMenu();
+  </script>
+</body>
+</html>

@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix | Admin</title>
+  <meta name="description" content="Back-office Athletix pour suivre les commandes, produits, clients et performances.">
+  <script src="assets/auth.js"></script>
+  <script>
+    window.AthletixAuth.requireAdmin();
+  </script>
+  <style>
+    :root {
+      --bg: #080706;
+      --panel: #12100d;
+      --panel-2: #19150f;
+      --ink: #fff8ec;
+      --muted: #b8aa92;
+      --gold: #d8b365;
+      --gold-2: #f2d27d;
+      --green: #9eff5f;
+      --red: #ff6f61;
+      --line: rgba(242,210,125,.16);
+      --line-strong: rgba(216,179,101,.42);
+      --shadow: 0 22px 70px rgba(0,0,0,.35), 0 0 38px rgba(216,179,101,.12);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    html:not(.admin-authorized) body { display: none; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(216,179,101,.16), transparent 32%),
+        radial-gradient(circle at 94% 8%, rgba(120,50,38,.16), transparent 28%),
+        linear-gradient(180deg, #080706 0%, #100d0a 58%, #070605 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body.locked { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin: 0; }
+    button, input, select { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: .12;
+      background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 100% 4px;
+      mix-blend-mode: screen;
+    }
+
+    .admin-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px;
+      border-right: 1px solid var(--line);
+      background: rgba(7,6,5,.74);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 4px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+      text-transform: uppercase;
+    }
+
+    .brand strong {
+      font-size: 28px;
+      line-height: .9;
+      letter-spacing: -.03em;
+    }
+
+    .brand span {
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .28em;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .side-nav a,
+    .logout {
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: rgba(255,248,236,.74);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .side-nav a.active,
+    .side-nav a:hover,
+    .logout:hover {
+      border-color: var(--line);
+      background: rgba(216,179,101,.08);
+      color: var(--ink);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 22px clamp(14px, 3vw, 34px) 44px;
+    }
+
+    .topbar {
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 24px;
+    }
+
+    .topbar h1 {
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(42px, 5vw, 76px);
+      line-height: .85;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .topbar h1 span { color: var(--gold-2); }
+
+    .status-pill {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid rgba(158,255,95,.28);
+      border-radius: 999px;
+      background: rgba(158,255,95,.08);
+      color: var(--green);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card,
+    .panel,
+    .product-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015)), var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      min-height: 124px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+      gap: 16px;
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .stat-card strong {
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: .9;
+      letter-spacing: -.04em;
+    }
+
+    .stat-card small {
+      color: var(--green);
+      font-weight: 850;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, .55fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 66px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      font-size: 14px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .field,
+    .select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(0,0,0,.2);
+      color: var(--ink);
+      padding: 0 12px;
+      outline: none;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field::placeholder { color: rgba(255,248,236,.42); }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th, td {
+      padding: 15px 16px;
+      border-bottom: 1px solid rgba(242,210,125,.1);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: rgba(255,248,236,.88);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    tr:hover td { background: rgba(216,179,101,.045); }
+
+    .tag {
+      width: max-content;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+      color: var(--gold-2);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .tag.green { color: var(--green); border-color: rgba(158,255,95,.24); background: rgba(158,255,95,.07); }
+    .tag.red { color: var(--red); border-color: rgba(255,111,97,.24); background: rgba(255,111,97,.07); }
+
+    .quick-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .product-list {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .page-card {
+      min-height: 132px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(216,179,101,.08), rgba(255,255,255,.018)), var(--panel);
+      box-shadow: var(--shadow);
+      display: grid;
+      align-content: space-between;
+      gap: 16px;
+      transition: transform .25s ease, border-color .25s ease, background .25s ease;
+    }
+
+    .page-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      background: linear-gradient(180deg, rgba(216,179,101,.13), rgba(255,255,255,.026)), var(--panel);
+    }
+
+    .page-card span {
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .page-card strong {
+      font-size: 18px;
+      line-height: 1;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .page-card small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .product-row {
+      display: grid;
+      grid-template-columns: 74px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid rgba(242,210,125,.1);
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.16);
+      transition: border-color .25s ease, background .25s ease;
+    }
+
+    .product-row:hover {
+      border-color: var(--line-strong);
+      background: rgba(216,179,101,.055);
+    }
+
+    .product-row img {
+      width: 74px;
+      height: 86px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #0c0a08;
+    }
+
+    .product-row strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .product-row span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .stock {
+      text-align: right;
+      color: var(--gold-2);
+      font-weight: 950;
+    }
+
+    .timeline {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .timeline-item::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      margin-top: 4px;
+      border-radius: 999px;
+      background: var(--gold);
+      box-shadow: 0 0 18px rgba(216,179,101,.38);
+    }
+
+    .timeline-item strong {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .login {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(216,179,101,.24), transparent 34%),
+        rgba(7,6,5,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .login[hidden] {
+      display: none !important;
+    }
+
+    .login.is-hidden { display: none; }
+
+    .login-card {
+      width: min(470px, 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)), #100d0a;
+      box-shadow: var(--shadow);
+      padding: 26px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .login-card h2 {
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: 58px;
+      line-height: .84;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .login-card h2 span { color: var(--gold-2); display: block; }
+    .login-card p { color: var(--muted); line-height: 1.55; }
+
+    .login-card label {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .login-card input {
+      min-height: 52px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.28);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .button {
+      min-height: 52px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f4d78f, #c99d44);
+      color: #120e09;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .login-error {
+      min-height: 20px;
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .demo-note {
+      border: 1px solid rgba(255,111,97,.22);
+      border-radius: var(--radius);
+      background: rgba(255,111,97,.055);
+      color: rgba(255,248,236,.76);
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1040px) {
+      .admin-shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 14px;
+      }
+      .side-nav {
+        grid-template-columns: repeat(6, max-content);
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+      .sidebar-footer { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .page-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding-bottom: 16px;
+      }
+      .stats-grid { grid-template-columns: 1fr; }
+      .page-grid { grid-template-columns: 1fr; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+      .product-row { grid-template-columns: 64px 1fr; }
+      .stock { grid-column: 2; text-align: left; }
+      .login-card h2 { font-size: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <div class="login" id="login" hidden>
+    <form class="login-card" id="loginForm">
+      <div>
+        <h2>Athletix<span>Admin</span></h2>
+        <p>Acces prive pour suivre les commandes, les clients, les produits et les performances de la boutique.</p>
+      </div>
+      <label>
+        Mot de passe admin
+        <input id="password" type="password" autocomplete="current-password" placeholder="Entre le mot de passe">
+      </label>
+      <button class="button" type="submit">Entrer dans l'admin</button>
+      <p class="login-error" id="loginError"></p>
+      <div class="demo-note">Acces reserve aux comptes ayant le role administrateur.</div>
+    </form>
+  </div>
+
+  <div class="admin-shell">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">
+        <strong>Athletix</strong>
+        <span>Back office</span>
+      </a>
+
+      <nav class="side-nav" aria-label="Navigation admin">
+        <a class="active" href="#dashboard">Dashboard <span>01</span></a>
+        <a href="admin-orders.html">Commandes <span>02</span></a>
+        <a href="admin-products.html">Produits <span>03</span></a>
+        <a href="admin-stocks.html">Stocks <span>04</span></a>
+        <a href="admin-clients.html">Clients <span>05</span></a>
+        <a href="index.html">Boutique <span>EXT</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout" id="logout" type="button">Deconnexion <span>X</span></button>
+        <p>Interface admin preparee pour connecter Stripe, Shopify ou Supabase.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar" id="dashboard">
+        <div>
+          <h1>Admin <span>Athletix</span></h1>
+        </div>
+        <span class="status-pill">Boutique active</span>
+      </section>
+
+      <section class="stats-grid" aria-label="Indicateurs boutique">
+        <article class="stat-card">
+          <span>Chiffre d'affaires</span>
+          <strong>389,88 EUR</strong>
+          <small>+18% cette semaine</small>
+        </article>
+        <article class="stat-card">
+          <span>Commandes</span>
+          <strong>12</strong>
+          <small>4 a expedier</small>
+        </article>
+        <article class="stat-card">
+          <span>Panier moyen</span>
+          <strong>32,49 EUR</strong>
+          <small>Drop CompressX</small>
+        </article>
+        <article class="stat-card">
+          <span>Stock total</span>
+          <strong>87</strong>
+          <small>3 produits actifs</small>
+        </article>
+      </section>
+
+      <section class="page-grid" id="pages" aria-label="Pages accessibles depuis l'administration">
+        <a class="page-card" href="index.html">
+          <span>Page principale</span>
+          <strong>Accueil</strong>
+          <small>Voir la boutique complete avec la banniere premium.</small>
+        </a>
+        <a class="page-card" href="tshirts.html">
+          <span>Vente</span>
+          <strong>T-shirts</strong>
+          <small>Acceder aux deux t-shirts compression.</small>
+        </a>
+        <a class="page-card" href="sweats.html">
+          <span>Vente</span>
+          <strong>Sweats</strong>
+          <small>Acceder au sweat Ange Dechu.</small>
+        </a>
+        <a class="page-card" href="collections.html">
+          <span>Catalogue</span>
+          <strong>Collections</strong>
+          <small>Voir les deux lignes de produits Athletix.</small>
+        </a>
+        <a class="page-card" href="about.html">
+          <span>Marque</span>
+          <strong>A propos</strong>
+          <small>Voir la page histoire et univers de marque.</small>
+        </a>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="panel" id="orders">
+          <div class="panel-head">
+            <h2>Commandes recentes</h2>
+            <div class="filters">
+              <input class="field" id="search" type="search" placeholder="Rechercher">
+              <select class="select" id="statusFilter">
+                <option value="all">Tous les statuts</option>
+                <option value="A expedier">A expedier</option>
+                <option value="Payee">Payee</option>
+                <option value="Livree">Livree</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Commande</th>
+                  <th>Client</th>
+                  <th>Produit</th>
+                  <th>Total</th>
+                  <th>Paiement</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="quick-stack">
+          <div class="panel" id="products">
+            <div class="panel-head">
+              <h2>Produits actifs</h2>
+              <span class="tag green">En ligne</span>
+            </div>
+            <div class="product-list">
+              <a class="product-row" href="tshirts.html">
+                <img src="assets/tee-white-front.png" alt="T-shirt compression blanc">
+                <div>
+                  <strong>T-shirt blanc</strong>
+                  <span>CompressX · 29,99 EUR</span>
+                </div>
+                <span class="stock">32 stock</span>
+              </a>
+              <a class="product-row" href="tshirts.html">
+                <img src="assets/tee-black-front.png" alt="T-shirt compression noir">
+                <div>
+                  <strong>T-shirt noir</strong>
+                  <span>CompressX · 29,99 EUR</span>
+                </div>
+                <span class="stock">28 stock</span>
+              </a>
+              <a class="product-row" href="sweats.html">
+                <img src="assets/hoodie-front.png" alt="Sweat Ange Dechu">
+                <div>
+                  <strong>Sweat oversize</strong>
+                  <span>Ange Dechu · 49,99 EUR</span>
+                </div>
+                <span class="stock">27 stock</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="panel" id="clients">
+            <div class="panel-head">
+              <h2>Activite clients</h2>
+              <span class="tag">Live</span>
+            </div>
+            <div class="timeline">
+              <div class="timeline-item">
+                <p><strong>Nouveau client</strong> Lucas M. a commande un t-shirt noir en taille M.</p>
+              </div>
+              <div class="timeline-item">
+                <p><strong>Commande payee</strong> La commande ATH-1027 est prete a preparer.</p>
+              </div>
+              <div class="timeline-item">
+                <p><strong>Stock surveille</strong> Le sweat Ange Dechu passe sous 30 pieces.</p>
+              </div>
+              <div class="timeline-item">
+                <p><strong>Meilleure vente</strong> CompressX noir represente 42% des ventes.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const orders = [
+      { id: "ATH-1031", client: "Lucas M.", product: "T-shirt compression noir", total: "29,99 EUR", payment: "Carte", status: "A expedier" },
+      { id: "ATH-1030", client: "Nassim B.", product: "Sweat Ange Dechu", total: "49,99 EUR", payment: "Apple Pay", status: "A expedier" },
+      { id: "ATH-1029", client: "Enzo R.", product: "T-shirt compression blanc", total: "29,99 EUR", payment: "Carte", status: "Payee" },
+      { id: "ATH-1028", client: "Yanis D.", product: "T-shirt noir + blanc", total: "59,98 EUR", payment: "PayPal", status: "Livree" },
+      { id: "ATH-1027", client: "Adam K.", product: "Sweat Ange Dechu", total: "49,99 EUR", payment: "Carte", status: "A expedier" },
+      { id: "ATH-1026", client: "Mehdi S.", product: "T-shirt compression noir", total: "29,99 EUR", payment: "Apple Pay", status: "Livree" }
+    ];
+
+    const login = document.querySelector("#login");
+    const loginForm = document.querySelector("#loginForm");
+    const loginError = document.querySelector("#loginError");
+    const password = document.querySelector("#password");
+    const logout = document.querySelector("#logout");
+    const search = document.querySelector("#search");
+    const statusFilter = document.querySelector("#statusFilter");
+    const ordersBody = document.querySelector("#ordersBody");
+    const adminLinks = Array.from(document.querySelectorAll(".side-nav a[href^='#']"));
+
+    function unlockAdmin() {
+      sessionStorage.setItem("athletixAdminUnlocked", "true");
+      login.classList.add("is-hidden");
+      document.body.classList.remove("locked");
+    }
+
+    function lockAdmin() {
+      sessionStorage.removeItem("athletixAdminUnlocked");
+      window.AthletixAuth?.clearAuth?.();
+      window.location.href = "index.html";
+    }
+
+    function renderOrders() {
+      const q = search.value.trim().toLowerCase();
+      const status = statusFilter.value;
+      const filtered = orders.filter((order) => {
+        const text = Object.values(order).join(" ").toLowerCase();
+        const matchesText = text.includes(q);
+        const matchesStatus = status === "all" || order.status === status;
+        return matchesText && matchesStatus;
+      });
+
+      ordersBody.innerHTML = filtered.map((order) => {
+        const statusClass = order.status === "A expedier" ? "red" : order.status === "Livree" ? "green" : "";
+        return `
+          <tr>
+            <td>${order.id}</td>
+            <td>${order.client}</td>
+            <td>${order.product}</td>
+            <td>${order.total}</td>
+            <td>${order.payment}</td>
+            <td><span class="tag ${statusClass}">${order.status}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function setActiveSection(hash) {
+      adminLinks.forEach((link) => {
+        link.classList.toggle("active", link.getAttribute("href") === hash);
+      });
+    }
+
+    loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      loginError.textContent = "Connexion par role admin requise.";
+    });
+
+    logout.addEventListener("click", lockAdmin);
+    search.addEventListener("input", renderOrders);
+    statusFilter.addEventListener("change", renderOrders);
+    adminLinks.forEach((link) => {
+      link.addEventListener("click", () => setActiveSection(link.getAttribute("href")));
+    });
+
+    window.addEventListener("hashchange", () => {
+      if (location.hash) setActiveSection(location.hash);
+    });
+
+    renderOrders();
+    if (location.hash) setActiveSection(location.hash);
+  </script>
+</body>
+</html>

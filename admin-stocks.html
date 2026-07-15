@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athletix Admin | Stocks</title>
+  <meta name="description" content="Gestion des stocks du back-office Athletix.">
+  <script src="assets/auth.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-store.js"></script>
+  <script>
+    window.AthletixAuth.requireAdmin();
+  </script>
+  <style>
+    :root {
+      --page: #f2f1ef;
+      --surface: #ffffff;
+      --surface-2: #f8f7f5;
+      --ink: #23211f;
+      --muted: #6d6860;
+      --line: #dedbd5;
+      --line-strong: #c9c3b8;
+      --dark: #0f0d0a;
+      --gold: #c59b45;
+      --gold-2: #e5c16a;
+      --green: #178744;
+      --green-bg: #e9f7ef;
+      --orange: #a76518;
+      --orange-bg: #fff1dd;
+      --red: #b42318;
+      --red-bg: #fff0ee;
+      --radius: 14px;
+      --shadow: 0 1px 2px rgba(0,0,0,.08), 0 12px 28px rgba(0,0,0,.06);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--page); }
+    html:not(.admin-authorized) body { display: none; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin: 0; }
+    button, input { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 18px 14px;
+      background: #15120e;
+      color: #fff8ec;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      padding: 10px 12px 18px;
+      border-bottom: 1px solid rgba(229,193,106,.2);
+      display: grid;
+      gap: 4px;
+      text-transform: uppercase;
+    }
+
+    .brand strong {
+      font-size: 26px;
+      line-height: .9;
+      letter-spacing: -.03em;
+    }
+
+    .brand span {
+      color: var(--gold-2);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .26em;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .side-nav a,
+    .logout {
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: rgba(255,248,236,.78);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .side-nav a.active,
+    .side-nav a:hover,
+    .logout:hover {
+      color: #fff8ec;
+      border-color: rgba(229,193,106,.28);
+      background: rgba(229,193,106,.12);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 24px clamp(16px, 3vw, 34px) 56px;
+    }
+
+    .topbar {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-icon {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    h1 {
+      font-size: clamp(28px, 3vw, 38px);
+      letter-spacing: -.03em;
+    }
+
+    .button {
+      min-height: 44px;
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      padding: 0 16px;
+      background: var(--surface);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+      box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    }
+
+    .button.primary {
+      background: var(--dark);
+      color: #fff8ec;
+      border-color: var(--dark);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .summary-card,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-card {
+      min-height: 112px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+      gap: 14px;
+    }
+
+    .summary-card span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .summary-card strong {
+      font-size: 30px;
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 70px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      background: var(--surface-2);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    td {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .product-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .product-cell img {
+      width: 56px;
+      height: 66px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      object-fit: cover;
+      background: #111;
+    }
+
+    .product-cell strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .product-cell span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stock-input {
+      width: 110px;
+      min-height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--ink);
+      padding: 0 12px;
+      font-weight: 950;
+      outline: none;
+    }
+
+    .stock-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(197,155,69,.16);
+    }
+
+    .badge {
+      width: max-content;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      background: #ece8df;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .badge.green { color: var(--green); background: var(--green-bg); }
+    .badge.orange { color: var(--orange); background: var(--orange-bg); }
+    .badge.red { color: var(--red); background: var(--red-bg); }
+
+    .save-note {
+      min-height: 22px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .side-nav {
+        grid-template-columns: repeat(7, max-content);
+        overflow-x: auto;
+      }
+      .sidebar-footer { display: none; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 680px) {
+      .main { padding-inline: 12px; }
+      .topbar,
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="admin.html">
+        <strong>Athletix</strong>
+        <span>Back office</span>
+      </a>
+      <nav class="side-nav" aria-label="Navigation admin">
+        <a href="admin.html">Dashboard <span>01</span></a>
+        <a href="admin-orders.html">Commandes <span>02</span></a>
+        <a href="admin-products.html">Produits <span>03</span></a>
+        <a class="active" href="admin-stocks.html">Stocks <span>04</span></a>
+        <a href="admin-clients.html">Clients <span>05</span></a>
+        <a href="index.html">Boutique <span>EXT</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="logout" id="logout" type="button">Deconnexion <span>X</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <span class="title-icon">S</span>
+          <h1>Stocks</h1>
+        </div>
+        <a class="button primary" href="index.html">Voir la boutique</a>
+      </header>
+
+      <section class="summary" aria-label="Resume stocks">
+        <article class="summary-card">
+          <span>Produits suivis</span>
+          <strong id="productCount">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Stock total</span>
+          <strong id="stockTotal">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Stock faible</span>
+          <strong id="lowStock">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Ruptures</span>
+          <strong id="outOfStock">0</strong>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Modifier les quantites</h2>
+          <p class="save-note" id="saveNote">Les stocks sont synchronises avec la boutique.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Collection</th>
+                <th>Stock actuel</th>
+                <th>Modifier</th>
+                <th>Etat</th>
+                <th>Page</th>
+              </tr>
+            </thead>
+            <tbody id="stocksBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const defaultProducts = [
+      {
+        id: "PROD-COMP-WHITE",
+        name: "T-shirt Compression - Blanc",
+        collection: "CompressX",
+        stock: 32,
+        img: "assets/tee-white-front.png",
+        page: "tshirts.html"
+      },
+      {
+        id: "PROD-COMP-BLACK",
+        name: "T-shirt Compression - Noir",
+        collection: "CompressX",
+        stock: 28,
+        img: "assets/tee-black-front.png",
+        page: "tshirts.html"
+      },
+      {
+        id: "PROD-HOODIE-ANGE",
+        name: "Hoodie Oversize - Bleu ciel",
+        collection: "Ange Dechu",
+        stock: 27,
+        img: "assets/hoodie-front.png",
+        page: "sweats.html"
+      }
+    ];
+
+    const productStorageKey = "athletixProducts";
+    const stocksBody = document.querySelector("#stocksBody");
+    const saveNote = document.querySelector("#saveNote");
+    const logout = document.querySelector("#logout");
+    let products = [];
+
+    function loadLocalProducts() {
+      const saved = localStorage.getItem(productStorageKey);
+      if (!saved) return defaultProducts.map((product) => ({ ...product }));
+      try {
+        const parsed = JSON.parse(saved);
+        return defaultProducts.map((product) => ({ ...product, ...(parsed.find((item) => item.id === product.id) || {}) }));
+      } catch {
+        return defaultProducts.map((product) => ({ ...product }));
+      }
+    }
+
+    async function loadProducts() {
+      if (window.AthletixStore?.isConfigured()) {
+        try {
+          const supabaseProducts = await window.AthletixStore.getProducts();
+          if (supabaseProducts.length) return supabaseProducts;
+        } catch (error) {
+          console.warn("Supabase stocks indisponible, retour demo.", error);
+        }
+      }
+      return loadLocalProducts();
+    }
+
+    function saveProducts() {
+      localStorage.setItem(productStorageKey, JSON.stringify(products));
+    }
+
+    function stockState(product) {
+      if (product.stock <= 0) return { label: "Rupture", className: "red" };
+      if (product.stock <= 10) return { label: "Stock critique", className: "red" };
+      if (product.stock <= 30) return { label: "Stock faible", className: "orange" };
+      return { label: "Disponible", className: "green" };
+    }
+
+    function updateSummary() {
+      document.querySelector("#productCount").textContent = products.length;
+      document.querySelector("#stockTotal").textContent = products.reduce((sum, product) => sum + product.stock, 0);
+      document.querySelector("#lowStock").textContent = products.filter((product) => product.stock > 0 && product.stock <= 30).length;
+      document.querySelector("#outOfStock").textContent = products.filter((product) => product.stock <= 0).length;
+    }
+
+    function renderStocks() {
+      stocksBody.innerHTML = products.map((product) => {
+        const state = stockState(product);
+        return `
+          <tr>
+            <td>
+              <div class="product-cell">
+                <img src="${product.img}" alt="">
+                <div>
+                  <strong>${product.name}</strong>
+                  <span>${product.id}</span>
+                </div>
+              </div>
+            </td>
+            <td>${product.collection}</td>
+            <td>${product.stock} pieces</td>
+            <td><input class="stock-input" type="number" min="0" step="1" value="${product.stock}" data-id="${product.id}" aria-label="Stock ${product.name}"></td>
+            <td><span class="badge ${state.className}">${state.label}</span></td>
+            <td><a class="badge" href="${product.page}">Voir</a></td>
+          </tr>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".stock-input").forEach((input) => {
+        input.addEventListener("change", async () => {
+          const product = products.find((item) => item.id === input.dataset.id);
+          if (!product) return;
+          const stock = Math.max(0, Number(input.value) || 0);
+          product.stock = stock;
+          if (window.AthletixStore?.isConfigured()) {
+            try {
+              await window.AthletixStore.updateProductStock(product.id, stock);
+            } catch (error) {
+              console.warn("Stock Supabase non mis a jour.", error);
+            }
+          } else {
+            saveProducts();
+          }
+          updateSummary();
+          renderStocks();
+          saveNote.textContent = "Stock mis a jour sur la boutique.";
+          window.setTimeout(() => {
+            saveNote.textContent = "Les stocks sont synchronises avec la boutique.";
+          }, 1800);
+        });
+      });
+    }
+
+    logout.addEventListener("click", () => {
+      window.AthletixAuth?.clearAuth?.();
+      window.location.href = "index.html";
+    });
+
+    async function initStocks() {
+      products = await loadProducts();
+      if (!window.AthletixStore?.isConfigured()) saveProducts();
+      updateSummary();
+      renderStocks();
+    }
+
+    initStocks();
+  </script>
+</body>
+</html>
