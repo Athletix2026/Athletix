@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Athletix | Produit</title>
-  <meta name="description" content="Fiche produit Athletix : sportswear premium pour la salle.">
+  <meta name="description" content="Fiche produit Athletix : t-shirts compression et hoodie oversize pour la salle et le quotidien.">
   <link rel="stylesheet" href="assets/auth-ui.css">
   <style>
     :root {
@@ -618,7 +618,7 @@
 
   <footer class="footer">
     <strong>Athletix</strong>
-    <span>Fiche produit premium, prete pour Stripe Checkout.</span>
+    <span>Choisis ta taille, ajoute au panier, garde le fit propre.</span>
     <span><a href="collections.html">Retour collection</a></span>
   </footer>
 
@@ -629,7 +629,7 @@
       <button class="drawer-close" type="button" aria-label="Fermer le panier">×</button>
     </div>
     <div class="cart-items">
-      <p class="cart-empty">Ton panier est vide.</p>
+      <p class="cart-empty">Ton panier est vide. Choisis une taille pour commencer.</p>
     </div>
     <div class="drawer-foot">
       <div class="total-row"><span>Total</span><span class="cart-total">0,00 EUR</span></div>
@@ -644,16 +644,16 @@
         name: "T-shirt Compression - Blanc",
         title: "T-shirt compression blanc",
         kicker: "Compression",
-        description: "Un haut performance clair, ajuste et facile a porter pour les entrainements intensifs. Coupe propre, logo Athletix contraste, rendu premium en salle.",
+        description: "Un t-shirt compression clair pour garder une silhouette nette pendant l'effort. Coupe ajustee, logo contraste et matiere pensee pour les seances intenses.",
         price: 29.99,
         compare: 39.99,
         front: "assets/tee-white-front.png",
         hover: "assets/tee-white-hover.jpg",
         back: "tshirts.html",
         details: [
-          ["Coupe", "Compression pres du corps"],
+          ["Coupe", "Compression ajustee"],
           ["Couleur", "Blanc logo noir"],
-          ["Usage", "Musculation et fitness"],
+          ["Usage", "Musculation, fitness, training"],
           ["Livraison", "Offerte des 60 EUR"]
         ]
       },
@@ -662,14 +662,14 @@
         name: "T-shirt Compression - Noir",
         title: "T-shirt compression noir",
         kicker: "Core training",
-        description: "Le basique sombre Athletix pour un fit propre en seance. Compression visuelle, logo fort et look facile a associer.",
+        description: "Le t-shirt noir Athletix pour un fit propre en salle. Compression ajustee, logo blanc impactant et rendu facile a associer avec n'importe quel training.",
         price: 29.99,
         compare: 39.99,
         front: "assets/tee-black-front.png",
         hover: "assets/tee-black-hover.jpg",
         back: "tshirts.html",
         details: [
-          ["Coupe", "Compression pres du corps"],
+          ["Coupe", "Compression ajustee"],
           ["Couleur", "Noir logo blanc"],
           ["Usage", "Training quotidien"],
           ["Livraison", "Offerte des 60 EUR"]
@@ -680,16 +680,16 @@
         name: "Hoodie Oversize - Bleu ciel",
         title: "Sweat Ange Dechu",
         kicker: "Collection",
-        description: "Le hoodie signature Athletix : coupe oversize, matiere epaisse, visuel dos Ange Dechu et presence forte avant comme apres la seance.",
+        description: "Le hoodie signature Athletix : coupe oversize, matiere epaisse et visuel Ange Dechu au dos. Une piece forte pour arriver, repartir et garder une vraie presence.",
         price: 49.99,
         compare: 69.99,
         front: "assets/hoodie-front.png",
         hover: "assets/hoodie-hover.jpg",
         back: "sweats.html",
         details: [
-          ["Coupe", "Oversize lourd"],
+          ["Coupe", "Oversize ample"],
           ["Design", "Ange Dechu au dos"],
-          ["Usage", "Lifestyle et apres seance"],
+          ["Usage", "Avant seance, apres seance, quotidien"],
           ["Livraison", "Offerte des 60 EUR"]
         ]
       }
@@ -768,7 +768,7 @@
       const total = cart.reduce((sum, item) => sum + item.price, 0);
       cartTotal.textContent = formatPrice(total);
       if (!cart.length) {
-        cartItems.innerHTML = '<p class="cart-empty">Ton panier est vide.</p>';
+        cartItems.innerHTML = '<p class="cart-empty">Ton panier est vide. Choisis une taille pour commencer.</p>';
         return;
       }
       cartItems.innerHTML = cart.map((item) => `
