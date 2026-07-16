@@ -77,25 +77,15 @@
     if (!user) {
       mount.hidden = false;
       mount.innerHTML = `
-        <button class="profile-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Ouvrir le menu compte">
+        <button class="profile-trigger guest-profile" type="button" aria-label="Connexion au compte">
           <span class="profile-avatar">U</span>
+          <span class="profile-label">Compte</span>
         </button>
-        <div class="profile-menu" hidden>
-          <strong>Compte</strong>
-          <a href="${LOGIN}">Connexion</a>
-        </div>
       `;
       const trigger = mount.querySelector(".profile-trigger");
-      const menu = mount.querySelector(".profile-menu");
       trigger.addEventListener("click", (event) => {
         event.stopPropagation();
-        const open = menu.hidden;
-        menu.hidden = !open;
-        trigger.setAttribute("aria-expanded", String(open));
-      });
-      document.addEventListener("click", () => {
-        menu.hidden = true;
-        trigger.setAttribute("aria-expanded", "false");
+        window.location.href = LOGIN;
       });
       return;
     }
@@ -106,8 +96,9 @@
 
     mount.hidden = false;
     mount.innerHTML = `
-      <button class="profile-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <button class="profile-trigger account-profile" type="button" aria-haspopup="true" aria-expanded="false">
         <span class="profile-avatar">${initials(user)}</span>
+        <span class="profile-label">Compte</span>
       </button>
       <div class="profile-menu" hidden>
         <strong>${user.name || "Mon compte"}</strong>
