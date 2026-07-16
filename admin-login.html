@@ -166,6 +166,11 @@
       window.location.href = "admin.html";
     }
 
+    const loginParams = new URLSearchParams(window.location.search);
+    if (loginParams.get("logout") === "1") {
+      error.textContent = "Deconnexion effectuee. Tu peux te reconnecter quand tu veux.";
+    }
+
     async function supabaseRequest(path, options = {}, accessToken = "") {
       const response = await fetch(`${supabaseUrl}${path}`, {
         ...options,

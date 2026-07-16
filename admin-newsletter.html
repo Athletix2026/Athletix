@@ -432,8 +432,9 @@
 
     search.addEventListener("input", renderSubscribers);
     logout.addEventListener("click", () => {
+      sessionStorage.removeItem("athletixAdminUnlocked");
       window.AthletixAuth?.clearAuth?.();
-      window.location.href = "index.html";
+      window.location.href = "admin-login.html?logout=1";
     });
 
     async function initNewsletter() {

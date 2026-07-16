@@ -882,7 +882,7 @@
     function lock() {
       sessionStorage.removeItem("athletixAdminUnlocked");
       window.AthletixAuth?.clearAuth?.();
-      window.location.href = "index.html";
+      window.location.href = "admin-login.html?logout=1";
     }
 
     loginForm.addEventListener("submit", (event) => {
