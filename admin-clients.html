@@ -346,6 +346,33 @@
       cursor: pointer;
     }
 
+    .status-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-save {
+      min-height: 34px;
+      border: 1px solid rgba(229, 190, 104, .45);
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--gold), #c9962c);
+      color: #100d08;
+      padding: 0 12px;
+      outline: none;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .status-save:disabled {
+      opacity: .42;
+      cursor: not-allowed;
+      filter: grayscale(.45);
+    }
+
     .empty {
       padding: 28px 16px;
       color: var(--muted);
@@ -560,12 +587,15 @@
             <td>${formatTotal(order.total)}</td>
             <td>${paymentLabel(order)}</td>
             <td>
-              <select class="status-select" data-status-id="${order.id}" aria-label="Changer le statut de ${order.id}">
-                <option value="A expedier" ${order.status === "A expedier" ? "selected" : ""}>A expedier</option>
-                <option value="Expediee" ${order.status === "Expediee" ? "selected" : ""}>Expediee</option>
-                <option value="Payee" ${order.status === "Payee" ? "selected" : ""}>Payee</option>
-                <option value="Livree" ${order.status === "Livree" ? "selected" : ""}>Livree</option>
-              </select>
+              <div class="status-actions">
+                <select class="status-select" data-status-id="${order.id}" data-original-status="${order.status}" aria-label="Changer le statut de ${order.id}">
+                  <option value="A expedier" ${order.status === "A expedier" ? "selected" : ""}>A expedier</option>
+                  <option value="Expediee" ${order.status === "Expediee" ? "selected" : ""}>Expediee</option>
+                  <option value="Payee" ${order.status === "Payee" ? "selected" : ""}>Payee</option>
+                  <option value="Livree" ${order.status === "Livree" ? "selected" : ""}>Livree</option>
+                </select>
+                <button class="status-save" type="button" data-save-status="${order.id}" disabled>Enregistrer</button>
+              </div>
             </td>
           </tr>
         `;
@@ -573,7 +603,17 @@
 
       document.querySelectorAll("[data-status-id]").forEach((select) => {
         select.addEventListener("change", () => {
-          updateOrderStatus(select.dataset.statusId, select.value);
+          const saveButton = document.querySelector(`[data-save-status="${select.dataset.statusId}"]`);
+          if (saveButton) saveButton.disabled = select.value === select.dataset.originalStatus;
+        });
+      });
+      document.querySelectorAll("[data-save-status]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const select = document.querySelector(`[data-status-id="${button.dataset.saveStatus}"]`);
+          if (!select || button.disabled) return;
+          button.disabled = true;
+          button.textContent = "Envoi...";
+          updateOrderStatus(button.dataset.saveStatus, select.value);
         });
       });
 
