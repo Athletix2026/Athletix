@@ -358,7 +358,11 @@
       .brand { width: 142px; min-height: 50px; }
       .brand-wordmark { height: 38px; }
       .brand-wordmark img { width: 100%; }
-      .header-actions { display: none; }
+      .header-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .header-actions a { display: none; }
       .category-nav {
         justify-content: flex-start;
         gap: 28px;
